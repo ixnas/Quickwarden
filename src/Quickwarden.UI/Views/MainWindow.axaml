@@ -1,0 +1,109 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Quickwarden.UI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:Quickwarden.UI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Quickwarden.UI.Views.MainWindow"
+        x:DataType="viewModels:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Topmost="True"
+        Title="Quickwarden"
+        ShowInTaskbar="False"
+        Width="720"
+        Height="600"
+        TransparencyLevelHint="AcrylicBlur"
+        RequestedThemeVariant="Light"
+        CornerRadius="20"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaChromeHints="NoChrome"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        SystemDecorations="BorderOnly">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <viewModels:MainWindowViewModel />
+    </Design.DataContext>
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding HideCommand, Mode=OneWay}" />
+        <KeyBinding Gesture="{Binding SettingsShortcutGesture}" Command="{Binding ShowSettingsCommand, Mode=OneWay}" />
+    </Window.KeyBindings>
+    <Window.Styles>
+        <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="TextBox:disabled /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+    </Window.Styles>
+
+    <Grid>
+        <Rectangle Opacity="0.5" Fill="White"></Rectangle>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <TextBox Text="{Binding SearchBoxQuery}" IsEnabled="{Binding ApplicationInitialized}" BorderThickness="0"
+                     Margin="8" Name="SearchBox" Watermark="{Binding SearchBoxWatermark}" TextWrapping="NoWrap"
+                     FontSize="28" Grid.Row="0">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Up" Command="{Binding KeyUpCommand, Mode=OneWay}" />
+                    <KeyBinding Gesture="Down" Command="{Binding KeyDownCommand, Mode=OneWay}" />
+                    <KeyBinding Gesture="{Binding CopyUsernameGesture}" Command="{Binding CopyUsernameCommand, Mode=OneWay}" />
+                    <KeyBinding Gesture="{Binding CopyPasswordGesture}" Command="{Binding CopyPasswordCommand, Mode=OneWay}" />
+                    <KeyBinding Gesture="{Binding Copy2FaGesture}" Command="{Binding Copy2FaCommand, Mode=OneWay}" />
+                </TextBox.KeyBindings>
+                <Interaction.Behaviors>
+                    <FocusOnAttachedBehavior></FocusOnAttachedBehavior>
+                </Interaction.Behaviors>
+            </TextBox>
+            <ListBox Focusable="False" IsTabStop="False" Name="SearchResults" ItemsSource="{Binding Credentials}" SelectedItem="{Binding SelectedCredential}" Grid.Row="1">
+                <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                        <Setter Property="Focusable" Value="False"/>
+                    </Style>
+                </ListBox.Styles>
+            </ListBox>
+            <StackPanel Margin="8" Grid.Row="2" Orientation="Horizontal">
+                <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
+                    <Run Foreground="#888">Esc</Run>
+                    <Span> Hide</Span>
+                </TextBlock>
+                <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
+                    <Run Foreground="#888" Text="{Binding SettingsShortcut}"></Run>
+                    <Span> Settings...</Span>
+                </TextBlock>
+                <TextBlock IsVisible="{Binding CopyUsernameEnabled}" FontSize="13" Margin="8"
+                           VerticalAlignment="Center">
+                    <Run Foreground="#888" Text="{Binding CopyUsernameShortcut}"></Run>
+                    <Span> Copy username</Span>
+                </TextBlock>
+                <TextBlock IsVisible="{Binding CopyPasswordEnabled}" FontSize="13" Margin="8"
+                           VerticalAlignment="Center">
+                    <Run Foreground="#888" Text="{Binding CopyPasswordShortcut}"></Run>
+                    <Span> Copy password</Span>
+                </TextBlock>
+                <TextBlock IsVisible="{Binding Copy2FaEnabled}" FontSize="13" Margin="8" VerticalAlignment="Center">
+                    <Run Foreground="#888" Text="{Binding Copy2FaShortcut}"></Run>
+                    <Span> Copy 2FA</Span>
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+    </Grid>
+
+</Window>

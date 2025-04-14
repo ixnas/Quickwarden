@@ -1,0 +1,20 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Quickwarden.UI.App"
+             xmlns:local="using:Quickwarden.UI"
+             xmlns:vm="clr-namespace:Quickwarden.UI.ViewModels"
+             xmlns:viewModels="clr-namespace:Quickwarden.UI.ViewModels"
+             xmlns:ui="clr-namespace:Quickwarden.UI"
+             x:DataType="viewModels:AppViewModel"
+             Name="Quickwarden"
+             RequestedThemeVariant="Default">
+    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.DataTemplates>
+        <ui:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+</Application>

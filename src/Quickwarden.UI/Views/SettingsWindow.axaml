@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Quickwarden.UI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:Quickwarden.UI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Quickwarden.UI.Views.SettingsWindow"
+        x:DataType="viewModels:SettingsWindowViewModel"
+        Icon="/Assets/Icon-sm-256.png"
+        Title="Settings"
+        ShowInTaskbar="True"
+        Width="400"
+        Height="600"
+        RequestedThemeVariant="Light"
+        CanResize="False"
+        WindowStartupLocation="Manual">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <viewModels:SettingsWindowViewModel />
+    </Design.DataContext>
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding HideCommand, Mode=OneWay}" />
+    </Window.KeyBindings>
+    <ScrollViewer>
+        <StackPanel Spacing="8" Margin="16">
+            <TextBlock FontSize="24">Accounts</TextBlock>
+            <ListBox SelectedItem="{Binding SelectedAccount}" ItemsSource="{Binding Accounts}">
+            </ListBox>
+            <StackPanel Spacing="8" Orientation="Horizontal">
+                <Button Command="{Binding ShowSignInWindowCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">Add...</Button>
+                <Button Command="{Binding RemoveAccountCommand}" IsEnabled="{Binding RemoveButtonEnabled}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">Remove</Button>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+
+</Window>

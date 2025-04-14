@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Quickwarden.UI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:Quickwarden.UI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Quickwarden.UI.Views.SignInWindow"
+        x:DataType="viewModels:SignInWindowViewModel"
+        Icon="/Assets/Icon-sm-256.png"
+        Title="Sign in"
+        ShowInTaskbar="True"
+        Width="300"
+        Height="300"
+        RequestedThemeVariant="Light"
+        CanResize="False"
+        WindowStartupLocation="Manual">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <viewModels:SignInWindowViewModel />
+    </Design.DataContext>
+    <ScrollViewer>
+        <StackPanel Spacing="8" Margin="16">
+            <TextBlock FontSize="24">Sign in</TextBlock>
+            <TextBox IsVisible="{Binding !Needs2Fa}" Text="{Binding Username}" IsEnabled="{Binding !IsLoading}" Watermark="E-mail"></TextBox>
+            <TextBox IsVisible="{Binding !Needs2Fa}" Text="{Binding Password}" IsEnabled="{Binding !IsLoading}" PasswordChar="●" Watermark="Password"></TextBox>
+            <TextBox IsVisible="{Binding Needs2Fa}" Text="{Binding Totp}" IsEnabled="{Binding !IsLoading}" Watermark="2FA code"></TextBox>
+            <Button Command="{Binding SignInCommand}" IsEnabled="{Binding !IsLoading}">Sign in</Button>
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="DarkRed"></TextBlock>
+        </StackPanel>
+    </ScrollViewer>
+
+</Window>

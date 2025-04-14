@@ -1,0 +1,17 @@
+﻿{
+  "stryker-config": {
+    "mutation-level": "Standard",
+    "thresholds": {
+      "break": 100
+    },
+    "verbosity": "info",
+    "reporters": [
+      "Progress",
+      "Html"
+    ],
+    "report-file-name": "mutation-tests",
+    "project": "Quickwarden.Application.csproj",
+    "break-on-initial-test-failure": false,
+    "target-framework": "net9.0"
+  }
+}
