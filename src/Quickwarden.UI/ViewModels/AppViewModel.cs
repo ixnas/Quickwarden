@@ -34,7 +34,7 @@ public partial class AppViewModel : ViewModelBase
                                                  new TotpGenerator(new DefaultClock()),
                                                  new QuickwardenEnvironment());
         _globalKeyboardShortcutManager =
-            new GlobalKeyboardShortcutManager(() => Dispatcher.UIThread.Invoke(ShowWindow));
+            new GlobalKeyboardShortcutManager(ShowWindow);
         _mainWindow = new MainWindow();
         _mainWindow.Activated += (_, _) => _mainWindow.SearchBox.Focus();
         _mainWindow.DataContext = new MainWindowViewModel(_mainWindow);
