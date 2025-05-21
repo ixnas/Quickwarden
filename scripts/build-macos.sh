@@ -39,18 +39,16 @@ echo "-- Make a copy excluding the Bitwarden CLI tool."
 cp -r quickwarden-${GIT_VERSION}-macos-arm64 quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli
 cp -r quickwarden-${GIT_VERSION}-macos-x64 quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli
 
-echo "-- Fetch Bitwarden clients repository and build Bitwarden CLI executables."
-git clone https://github.com/bitwarden/clients.git --depth=1 --branch cli-v2025.4.0
-cd clients
-npm ci
-cd apps/cli
-npm run build:oss:prod && npm run clean
-npx pkg . --targets latest-macos-arm64 --output ./dist/oss/macos-arm64/bw
-npx pkg . --targets latest-macos-x64 --output ./dist/oss/macos-x64/bw
+echo "-- Download Bitwarden CLI executable into app bundles."
+curl -L -o bw.zip "https://github.com/bitwarden/clients/releases/download/cli-v2025.4.0/bw-oss-macos-2025.4.0.zip"
+unzip bw.zip
+rm -f bw.zip
+mv bw quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/
 
-echo "-- Copy Bitwarden CLI executable into app bundles."
-cp dist/oss/macos-x64/bw ../../../quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/
-cp dist/oss/macos-arm64/bw ../../../quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/
+curl -L -o bw.zip "https://github.com/bitwarden/clients/releases/download/cli-v2025.4.0/bw-oss-macos-arm64-2025.4.0.zip"
+unzip bw.zip
+rm -f bw.zip
+mv bw quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/
 
 cd ../../../
 
@@ -61,7 +59,6 @@ hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-maco
 hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli -ov -format UDZO quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli.dmg
 
 echo "-- Cleanup."
-rm -rf clients
 rm -rf quickwarden-${GIT_VERSION}-macos-x64
 rm -rf quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli
 rm -rf quickwarden-${GIT_VERSION}-macos-arm64

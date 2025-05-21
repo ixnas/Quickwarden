@@ -19,20 +19,8 @@ cp bin\Release\net9.0\win-x64\publish\* ..\..\dist\quickwarden-${GIT_VERSION}-wi
 
 cd ..\..\
 
-cd dist
-
-echo "-- Fetch Bitwarden clients repository and build Bitwarden CLI executables."
-git clone "https://github.com/bitwarden/clients.git" --depth=1 --branch cli-v2025.4.0
-cd clients
-npm ci
-cd apps\cli
-npm run build:oss:prod
-npm run clean
-npx pkg . --targets latest-win-x64 --output .\dist\oss\win-x64\bw.exe
-
-echo "-- Copy Bitwarden CLI executable into application directory."
-cp dist\oss\win-x64\bw.exe ..\..\..\quickwarden-${GIT_VERSION}-windows-x64\build\bw.exe
-
-echo "-- Delete Bitwarden clients repository."
-cd ..\..\..\
-Remove-Item clients -Recurse -Force
+echo "-- Download Bitwarden CLI executable into application directory."
+cd dist\quickwarden-${GIT_VERSION}-windows-x64\build\
+curl -o bw.zip "https://github.com/bitwarden/clients/releases/download/cli-v2025.4.0/bw-oss-windows-2025.4.0.zip"
+C:\Windows\System32\tar.exe -xf bw.zip
+Remove-Item bw.zip
