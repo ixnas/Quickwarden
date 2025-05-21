@@ -155,6 +155,7 @@ public partial class SignInWindowViewModel : ViewModelBase
             {
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
+                    IsLoading = false;
                     var box = MessageBoxManager.GetMessageBoxStandard("Error",
                                                                       $"{e.Message}\r\n\r\n${e.StackTrace}",
                                                                       ButtonEnum.Ok,

@@ -26,7 +26,7 @@
             <TextBox IsVisible="{Binding !Needs2Fa}" Text="{Binding Username}" IsEnabled="{Binding !IsLoading}" Watermark="E-mail"></TextBox>
             <TextBox IsVisible="{Binding !Needs2Fa}" Text="{Binding Password}" IsEnabled="{Binding !IsLoading}" PasswordChar="●" Watermark="Password"></TextBox>
             <TextBox IsVisible="{Binding Needs2Fa}" Text="{Binding Totp}" IsEnabled="{Binding !IsLoading}" Watermark="2FA code"></TextBox>
-            <Button Command="{Binding SignInCommand}" IsEnabled="{Binding !IsLoading}">Sign in</Button>
+            <Button IsDefault="True" Command="{Binding SignInCommand}" IsEnabled="{Binding !IsLoading}">Sign in</Button>
             <TextBlock Text="{Binding ErrorMessage}" Foreground="DarkRed"></TextBlock>
         </StackPanel>
     </ScrollViewer>

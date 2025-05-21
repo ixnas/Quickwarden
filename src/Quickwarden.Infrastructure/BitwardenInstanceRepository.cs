@@ -60,7 +60,7 @@ public class BitwardenInstanceRepository : IBitwardenInstanceRepository
             return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.Missing2Fa,
                                                      null);
 
-        throw new InvalidOperationException();
+        throw new BitwardenCliError(loginResult.StdErrLines, loginResult.StdOutLines);
     }
 
     private string[] GetArgs(string username, string password, string totp)
@@ -90,5 +90,17 @@ public class BitwardenInstanceRepository : IBitwardenInstanceRepository
         var vaultDirectory = Path.Join(QuickwardenEnvironment.VaultsPath, id);
         Directory.Delete(vaultDirectory, true);
         return Task.CompletedTask;
+    }
+}
+
+internal class BitwardenCliError : Exception
+{
+    public BitwardenCliError(string[] stdErrLines, string[] stdOutLines)
+    :base("Bitwarden CLI returned an unexpected error:\r\n"
+        + string.Join("\r\n", stdErrLines)
+        + ((stdOutLines.Length > 0 && !string.IsNullOrWhiteSpace(stdOutLines[0])
+            ?"\r\n\r\nConsole output:\r\n" + string.Join("\r\n", stdOutLines)
+            : string.Empty)))
+    {
     }
 }
