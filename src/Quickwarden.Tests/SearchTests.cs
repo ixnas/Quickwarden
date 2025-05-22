@@ -102,7 +102,7 @@ public class SearchTests : IAsyncLifetime
     {
         await SignInAccount1();
         await SignInAccount2();
-        var searchResults = _applicationController.Search("Entry1site.com");
+        var searchResults = _applicationController.Search("Vault 1 .com");
         
         var entry1 = searchResults.Single(item => item.Name == "Vault entry 1");
         Assert.Equal("sjoerd@entry1site.com", entry1.Username);

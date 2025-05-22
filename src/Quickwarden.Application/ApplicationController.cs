@@ -111,10 +111,12 @@ public class ApplicationController
             throw new ApplicationNotInitializedException();
         if (!_accounts.Any() || string.IsNullOrWhiteSpace(query))
             return [];
+        
+        var searchTerms = query.Split(' ');
 
         return _vaultItems
-               .Where(item => item.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase)
-                              || item.Username?.Contains(query, StringComparison.InvariantCultureIgnoreCase) == true)
+               .Where(item => searchTerms.Any(term => item.Name.Contains(term, StringComparison.InvariantCultureIgnoreCase))
+                              || searchTerms.Any(term => item.Username?.Contains(term, StringComparison.InvariantCultureIgnoreCase) == true))
                .Select(item => new SearchResultItem()
                {
                    Id = item.Id,
