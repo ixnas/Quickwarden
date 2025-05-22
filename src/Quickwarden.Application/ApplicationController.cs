@@ -9,8 +9,18 @@ using Quickwarden.Application.PlugIns.Totp;
 
 namespace Quickwarden.Application;
 
-internal record Account(string Id, string Username, string Secret);
-internal record Configuration(int Version, Account[] Accounts);
+internal record Account()
+{
+    public required string Id { get; init; }
+    public required string Username { get; init; }
+    public required string Secret { get; init; }
+}
+
+internal record Configuration()
+{
+    public int Version { get; init; }
+    public Account[] Accounts { get; init; } = [];
+}
 
 public class ApplicationController
 {
@@ -83,7 +93,13 @@ public class ApplicationController
                 return SignInResult.Missing2Fa;
             if (_accounts.Any(account => account.Username == username))
                 return SignInResult.AlreadySignedIn;
-            _accounts.Add(new Account(result.Key!.Id, username, result.Key.Secret));
+            var account = new Account()
+            {
+                Id = result.Key!.Id,
+                Username = username,
+                Secret = result.Key.Secret,
+            };
+            _accounts.Add(account);
 
             var repos = await _bitwardenInstanceRepository.Get([result.Key]);
             await LoadVaults(repos, cancellationToken);
@@ -125,7 +141,8 @@ public class ApplicationController
                                                                      StringComparison
                                                                          .InvariantCultureIgnoreCase)
                                                   || item.Username?.Contains(term,
-                                                      StringComparison.InvariantCultureIgnoreCase) == true))
+                                                           StringComparison.InvariantCultureIgnoreCase)
+                                                  == true))
                .Select(item => new SearchResultItem()
                {
                    Id = item.Id,
@@ -209,7 +226,11 @@ public class ApplicationController
 
     private async Task StoreAccounts()
     {
-        var configuration = new Configuration(ConfigurationVersion, _accounts.ToArray());
+        var configuration = new Configuration()
+        {
+            Version = ConfigurationVersion,
+            Accounts = _accounts.ToArray(),
+        };
         var serialized =
             JsonSerializer.Serialize(configuration, ApplicationJsonSerializerContext.Default.Configuration);
         var bytes = Encoding.UTF8.GetBytes(serialized);
