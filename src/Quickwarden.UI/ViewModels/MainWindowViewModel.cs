@@ -121,7 +121,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     public void CopyUsername()
     {
-        if (SelectedCredential == null || _applicationController == null)
+        if (SelectedCredential == null || !SelectedCredential.HasUsername || _applicationController == null)
             return;
         _mainWindow.Clipboard.SetTextAsync(_applicationController.GetUsername(SelectedCredential.Id));
         Hide();
@@ -130,7 +130,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     public void CopyPassword()
     {
-        if (SelectedCredential == null || _applicationController == null)
+        if (SelectedCredential == null || !SelectedCredential.HasPassword || _applicationController == null)
             return;
         _mainWindow.Clipboard.SetTextAsync(_applicationController.GetPassword(SelectedCredential.Id));
         Hide();
@@ -139,7 +139,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     public void Copy2Fa()
     {
-        if (SelectedCredential == null || _applicationController == null)
+        if (SelectedCredential == null || !SelectedCredential.HasTotp || _applicationController == null)
             return;
         _mainWindow.Clipboard.SetTextAsync(_applicationController.GetTotp(SelectedCredential.Id).Code);
         Hide();
