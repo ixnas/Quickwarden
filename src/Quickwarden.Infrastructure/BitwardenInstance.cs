@@ -33,6 +33,18 @@ public class BitwardenInstance : IBitwardenInstance
             ["BW_NOINTERACTION"] = "true",
             ["BW_SESSION"] = _key.Secret,
         };
+        await Sync(command, env);
+        return await GetVaultItems(command, env);
+    }
+
+    private async static Task Sync(string command, Dictionary<string, string> env)
+    {
+        string[] args = ["sync"];
+        await ShellExecutor.ExecuteAsync(command, args, env);
+    }
+
+    private async static Task<BitwardenVaultItem[]> GetVaultItems(string command, Dictionary<string, string> env)
+    {
         string[] args = ["list", "items"];
         var result = await ShellExecutor.ExecuteAsync(command, args, env);
         var entries = JsonSerializer.Deserialize<BitwardenVaultEntry[]>(result.StdOutLines.Single(),
