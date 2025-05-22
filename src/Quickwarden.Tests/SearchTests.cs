@@ -112,6 +112,15 @@ public class SearchTests : IAsyncLifetime
     }
     
     [Fact]
+    public async Task SearchConstraints()
+    {
+        await SignInAccount1();
+        await SignInAccount2();
+        var searchResults = _applicationController.Search("Vault 1 yxoe .com");
+        Assert.Empty(searchResults);
+    }
+    
+    [Fact]
     public async Task SearchAfterRestart()
     {
         await SignInAccount1();

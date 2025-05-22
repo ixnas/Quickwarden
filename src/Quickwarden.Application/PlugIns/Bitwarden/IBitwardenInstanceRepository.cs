@@ -4,7 +4,7 @@ public interface IBitwardenInstanceRepository
 {
     Task<BitwardenInstanceCreateResult> Create(string username, string password, string totp, CancellationToken cancellationToken);
     Task<IBitwardenInstance[]> Get(BitwardenInstanceKey[] keys);
-    Task Delete(string id);
+    Task Delete(BitwardenInstanceKey key);
 }
 
 public record BitwardenInstanceKey(string Id, string Username, string Secret);

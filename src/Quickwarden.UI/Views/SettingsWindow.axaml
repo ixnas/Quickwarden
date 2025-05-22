@@ -26,10 +26,10 @@
     <ScrollViewer>
         <StackPanel Spacing="8" Margin="16">
             <TextBlock FontSize="24">Accounts</TextBlock>
-            <ListBox SelectedItem="{Binding SelectedAccount}" ItemsSource="{Binding Accounts}">
+            <ListBox IsEnabled="{Binding !IsLoading}" SelectedItem="{Binding SelectedAccount}" ItemsSource="{Binding Accounts}">
             </ListBox>
             <StackPanel Spacing="8" Orientation="Horizontal">
-                <Button Command="{Binding ShowSignInWindowCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">Add...</Button>
+                <Button Command="{Binding ShowSignInWindowCommand}" IsEnabled="{Binding !IsLoading}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">Add...</Button>
                 <Button Command="{Binding RemoveAccountCommand}" IsEnabled="{Binding RemoveButtonEnabled}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">Remove</Button>
             </StackPanel>
         </StackPanel>

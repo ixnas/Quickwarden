@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -26,7 +26,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
     private readonly ApplicationController _applicationController;
     private SignInWindow? _signInWindow;
     private AccountModel? _selectedAccount;
-
+    private bool _isLoading;
     public AccountModel? SelectedAccount
     {
         get => _selectedAccount;
@@ -37,8 +37,17 @@ public partial class SettingsWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(RemoveButtonEnabled));
         }
     }
-
-    public bool RemoveButtonEnabled => SelectedAccount != null;
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set
+        {
+            _isLoading = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(RemoveButtonEnabled));
+        }
+    }
+    public bool RemoveButtonEnabled => SelectedAccount != null && !IsLoading;
 
     public AccountModel[] Accounts => _applicationController.GetAccounts().Select(account =>
         new AccountModel
@@ -67,7 +76,13 @@ public partial class SettingsWindowViewModel : ViewModelBase
         var result = await messageBox.ShowWindowDialogAsync(_settingsWindow);
         if (result == ButtonResult.Yes && SelectedAccount != null)
         {
-            // Sign out
+            Task.Run(async () =>
+            {
+                Dispatcher.UIThread.Invoke(() => IsLoading = true);
+                await _applicationController.SignOut(SelectedAccount.Id);
+                Dispatcher.UIThread.Invoke(RefreshAccounts);
+                Dispatcher.UIThread.Invoke(() => IsLoading = false);
+            });
         }
     }
 

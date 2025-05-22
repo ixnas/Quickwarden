@@ -42,7 +42,7 @@ public class ApplicationController
     {
         if (_initialized)
             throw new ApplicationAlreadyInitializedException();
-        
+
         var bitwardenCliInstalled = await _environment.BitwardenCliInstalled();
         if (!bitwardenCliInstalled)
             return ApplicationInitializeResult.BitwardenCliNotFound;
@@ -101,6 +101,11 @@ public class ApplicationController
     {
         if (!_initialized)
             throw new ApplicationNotInitializedException();
+        var account = _accounts.SingleOrDefault(a => a.Id == id);
+        if (account == null)
+            throw new KeyNotFoundException();
+        var key = new BitwardenInstanceKey(account.Id, account.Username, account.Secret);
+        await _bitwardenInstanceRepository.Delete(key);
         _accounts.RemoveAll(account => account.Id == id);
         await StoreAccounts();
     }
@@ -111,12 +116,16 @@ public class ApplicationController
             throw new ApplicationNotInitializedException();
         if (!_accounts.Any() || string.IsNullOrWhiteSpace(query))
             return [];
-        
+
         var searchTerms = query.Split(' ');
 
         return _vaultItems
-               .Where(item => searchTerms.Any(term => item.Name.Contains(term, StringComparison.InvariantCultureIgnoreCase))
-                              || searchTerms.Any(term => item.Username?.Contains(term, StringComparison.InvariantCultureIgnoreCase) == true))
+               .Where(item => searchTerms.All(term =>
+                                                  item.Name.Contains(term,
+                                                                     StringComparison
+                                                                         .InvariantCultureIgnoreCase)
+                                                  || item.Username?.Contains(term,
+                                                      StringComparison.InvariantCultureIgnoreCase) == true))
                .Select(item => new SearchResultItem()
                {
                    Id = item.Id,
@@ -177,11 +186,12 @@ public class ApplicationController
         }
 
         await LoadAccounts(listBytesEncrypted);
-            
-        var accountKeys = _accounts.Select(x => new BitwardenInstanceKey(x.Id, x.Username, x.Secret)).ToArray();
+
+        var accountKeys = _accounts.Select(x => new BitwardenInstanceKey(x.Id, x.Username, x.Secret))
+                                   .ToArray();
         var instances = await _bitwardenInstanceRepository.Get(accountKeys);
         await LoadVaults(instances, CancellationToken.None);
-            
+
         _initialized = true;
         return ApplicationInitializeResult.Success;
     }
@@ -191,7 +201,8 @@ public class ApplicationController
         var decryptor = new Decryptor(_secret);
         var decrypted = await decryptor.Decrypt(listBytesEncrypted);
         var configurationDeserialized =
-            JsonSerializer.Deserialize<Configuration>(decrypted, ApplicationJsonSerializerContext.Default.Configuration);
+            JsonSerializer.Deserialize<Configuration>(decrypted,
+                                                      ApplicationJsonSerializerContext.Default.Configuration);
         var accounts = configurationDeserialized.Accounts;
         _accounts.AddRange(accounts);
     }
@@ -199,7 +210,8 @@ public class ApplicationController
     private async Task StoreAccounts()
     {
         var configuration = new Configuration(ConfigurationVersion, _accounts.ToArray());
-        var serialized = JsonSerializer.Serialize(configuration, ApplicationJsonSerializerContext.Default.Configuration);
+        var serialized =
+            JsonSerializer.Serialize(configuration, ApplicationJsonSerializerContext.Default.Configuration);
         var bytes = Encoding.UTF8.GetBytes(serialized);
         var encryptor = new Encryptor(_secret);
         var encrypted = await encryptor.Encrypt(bytes);

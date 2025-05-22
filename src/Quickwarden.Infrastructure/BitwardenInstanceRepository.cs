@@ -85,22 +85,30 @@ public class BitwardenInstanceRepository : IBitwardenInstanceRepository
         return Task.FromResult(instances.ToArray());
     }
 
-    public Task Delete(string id)
+    public async Task Delete(BitwardenInstanceKey key)
     {
-        var vaultDirectory = Path.Join(QuickwardenEnvironment.VaultsPath, id);
+        var vaultDirectory = Path.Join(QuickwardenEnvironment.VaultsPath, key.Id);
+        var env = new Dictionary<string, string>()
+        {
+            ["BITWARDENCLI_APPDATA_DIR"] = vaultDirectory,
+            ["BW_NOINTERACTION"] = "true",
+            ["BW_SESSION"] = key.Secret,
+        };
+        var cmd = "bw";
+        string[] args = ["logout"];
+        await ShellExecutor.ExecuteAsync(cmd, args, env);
         Directory.Delete(vaultDirectory, true);
-        return Task.CompletedTask;
     }
 }
 
 internal class BitwardenCliError : Exception
 {
     public BitwardenCliError(string[] stdErrLines, string[] stdOutLines)
-    :base("Bitwarden CLI returned an unexpected error:\r\n"
-        + string.Join("\r\n", stdErrLines)
-        + ((stdOutLines.Length > 0 && !string.IsNullOrWhiteSpace(stdOutLines[0])
-            ?"\r\n\r\nConsole output:\r\n" + string.Join("\r\n", stdOutLines)
-            : string.Empty)))
+        : base("Bitwarden CLI returned an unexpected error:\r\n"
+               + string.Join("\r\n", stdErrLines)
+               + ((stdOutLines.Length > 0 && !string.IsNullOrWhiteSpace(stdOutLines[0])
+                       ? "\r\n\r\nConsole output:\r\n" + string.Join("\r\n", stdOutLines)
+                       : string.Empty)))
     {
     }
 }

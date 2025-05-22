@@ -6,7 +6,7 @@ public class BitwardenInstanceRepositoryFake : IBitwardenInstanceRepository
 {
     public bool EnableLongDelay { get; set; }
     public List<InstanceWithCredentials> InstancesWithCredentials { get; } = [];
-    private readonly List<InstanceWithCredentials> _bitwardenInstances = [];
+    public List<InstanceWithCredentials> BitwardenInstances { get; } = [];
 
     public async Task<BitwardenInstanceCreateResult> Create(string username,
                                                             string password,
@@ -34,21 +34,23 @@ public class BitwardenInstanceRepositoryFake : IBitwardenInstanceRepository
         if (totp != instance.Totp)
             return new(BitwardenInstanceCreateResultType.WrongCredentials, null);
 
-        _bitwardenInstances.Add(instance);
+        BitwardenInstances.Add(instance);
         return new(BitwardenInstanceCreateResultType.Success, instance.Key);
     }
 
     public Task<IBitwardenInstance[]> Get(BitwardenInstanceKey[] keys)
     {
-        return Task.FromResult(_bitwardenInstances
+        return Task.FromResult(BitwardenInstances
                                .Where(instance => keys.Contains(instance.Key))
                                .Select(instance => instance.Instance)
                                .ToArray());
     }
 
-    public Task Delete(string id)
+    public Task Delete(BitwardenInstanceKey key)
     {
-        _bitwardenInstances.RemoveAll(i => i.Instance.Id == id);
+        var found = InstancesWithCredentials.Any(i => i.Key == key);
+        if (found)
+            BitwardenInstances.RemoveAll(i => i.Instance.Id == key.Id);
         return Task.CompletedTask;
     }
 }
