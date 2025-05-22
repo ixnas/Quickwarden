@@ -9,19 +9,6 @@ using Quickwarden.Application.PlugIns.Totp;
 
 namespace Quickwarden.Application;
 
-internal record Account()
-{
-    public required string Id { get; init; }
-    public required string Username { get; init; }
-    public required string Secret { get; init; }
-}
-
-internal record Configuration()
-{
-    public int Version { get; init; }
-    public Account[] Accounts { get; init; } = [];
-}
-
 public class ApplicationController
 {
     private const int ConfigurationVersion = 0;

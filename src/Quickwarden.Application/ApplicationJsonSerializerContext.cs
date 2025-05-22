@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Quickwarden.Application.Internal;
 
 namespace Quickwarden.Application;
 

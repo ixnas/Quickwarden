@@ -1,6 +1,7 @@
 namespace Quickwarden.Application.Internal;
 
-internal class Configuration
+internal record Configuration()
 {
-    
+    public int Version { get; init; }
+    public Account[] Accounts { get; init; } = [];
 }

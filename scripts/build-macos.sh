@@ -50,8 +50,6 @@ unzip bw.zip
 rm -f bw.zip
 mv bw quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/
 
-cd ../../../
-
 echo "-- Generate DMG images."
 hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-x64 -ov -format UDZO quickwarden-${GIT_VERSION}-macos-x64.dmg
 hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli -ov -format UDZO quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli.dmg
