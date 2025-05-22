@@ -10,9 +10,11 @@ using Quickwarden.Application.PlugIns.Totp;
 namespace Quickwarden.Application;
 
 internal record Account(string Id, string Username, string Secret);
+internal record Configuration(int Version, Account[] Accounts);
+
 public class ApplicationController
 {
-
+    private const int ConfigurationVersion = 0;
     private readonly ISecretRepository _secretRepository;
     private readonly IQuickwardenEnvironment _environment;
     private readonly IBitwardenInstanceRepository _bitwardenInstanceRepository;
@@ -186,14 +188,16 @@ public class ApplicationController
     {
         var decryptor = new Decryptor(_secret);
         var decrypted = await decryptor.Decrypt(listBytesEncrypted);
-        var accountsDeserialized =
-            JsonSerializer.Deserialize<Account[]>(decrypted, ApplicationJsonSerializerContext.Default.AccountArray) ?? [];
-        _accounts.AddRange(accountsDeserialized);
+        var configurationDeserialized =
+            JsonSerializer.Deserialize<Configuration>(decrypted, ApplicationJsonSerializerContext.Default.Configuration);
+        var accounts = configurationDeserialized.Accounts;
+        _accounts.AddRange(accounts);
     }
 
     private async Task StoreAccounts()
     {
-        var serialized = JsonSerializer.Serialize(_accounts.ToArray(), ApplicationJsonSerializerContext.Default.AccountArray);
+        var configuration = new Configuration(ConfigurationVersion, _accounts.ToArray());
+        var serialized = JsonSerializer.Serialize(configuration, ApplicationJsonSerializerContext.Default.Configuration);
         var bytes = Encoding.UTF8.GetBytes(serialized);
         var encryptor = new Encryptor(_secret);
         var encrypted = await encryptor.Encrypt(bytes);
