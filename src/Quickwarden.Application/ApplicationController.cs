@@ -242,6 +242,8 @@ public class ApplicationController
         }
 
         _vaultItems.AddRange(allItems);
+        var itemIds = _vaultItems.Select(x => x.Id).ToArray();
+        _recentVaultEntries.RemoveAll(item => !itemIds.Contains(item.Id));
     }
 
     private async Task<BitwardenVaultItem> GetVaultItem(string id)

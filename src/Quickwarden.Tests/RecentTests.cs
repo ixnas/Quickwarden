@@ -1,5 +1,6 @@
 using Quickwarden.Application;
 using Quickwarden.Application.PlugIns.FrontEnd;
+using Quickwarden.Tests.Fakes;
 
 namespace Quickwarden.Tests;
 
@@ -135,6 +136,25 @@ public class RecentTests
         await SignInAccount2();
         GetCredentialsFns[credential]("234978");
         await _applicationController.SignOut("id1");
+        var search1 = _applicationController.Search(string.Empty);
+        Assert.Empty(search1);
+    }
+    
+    [Theory]
+    [InlineData(Credentials.Username)]
+    [InlineData(Credentials.Password)]
+    [InlineData(Credentials.Totp)]
+    public async Task RemovedVaultItem(Credentials credential)
+    {
+        await _applicationController.Initialize();
+        await SignInAccount1();
+        await SignInAccount2();
+        GetCredentialsFns[credential]("234978");
+        var instance = _fixture.BitwardenInstanceRepository.BitwardenInstances
+                               .Single(instance => instance.Key.Id == "id1");
+        ((BitwardenInstanceFake)instance.Instance).VaultItems.RemoveAll(item => item.Id == "234978");
+        _applicationController = _fixture.CreateApplicationController();
+        await _applicationController.Initialize();
         var search1 = _applicationController.Search(string.Empty);
         Assert.Empty(search1);
     }
