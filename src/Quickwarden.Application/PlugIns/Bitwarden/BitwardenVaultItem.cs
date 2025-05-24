@@ -2,6 +2,7 @@ namespace Quickwarden.Application.PlugIns.Bitwarden;
 
 public class BitwardenVaultItem
 {
+    public string VaultId { get; init; }
     public string Id { get; init; }
     public string Name { get; init; }
     public string? Username { get; init; }

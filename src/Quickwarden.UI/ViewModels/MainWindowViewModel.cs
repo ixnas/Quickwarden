@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.Input;
@@ -119,29 +120,29 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public void CopyUsername()
+    public async Task CopyUsername()
     {
         if (SelectedCredential == null || !SelectedCredential.HasUsername || _applicationController == null)
             return;
-        _mainWindow.Clipboard.SetTextAsync(_applicationController.GetUsername(SelectedCredential.Id));
+        await _mainWindow.Clipboard.SetTextAsync(await _applicationController.GetUsername(SelectedCredential.Id));
         Hide();
     }
 
     [RelayCommand]
-    public void CopyPassword()
+    public async Task CopyPassword()
     {
         if (SelectedCredential == null || !SelectedCredential.HasPassword || _applicationController == null)
             return;
-        _mainWindow.Clipboard.SetTextAsync(_applicationController.GetPassword(SelectedCredential.Id));
+        await _mainWindow.Clipboard.SetTextAsync(await _applicationController.GetPassword(SelectedCredential.Id));
         Hide();
     }
 
     [RelayCommand]
-    public void Copy2Fa()
+    public async Task Copy2Fa()
     {
         if (SelectedCredential == null || !SelectedCredential.HasTotp || _applicationController == null)
             return;
-        _mainWindow.Clipboard.SetTextAsync(_applicationController.GetTotp(SelectedCredential.Id).Code);
+        await _mainWindow.Clipboard.SetTextAsync((await _applicationController.GetTotp(SelectedCredential.Id)).Code);
         Hide();
     }
 
@@ -150,6 +151,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _applicationController = applicationController;
         OnPropertyChanged(nameof(ApplicationInitialized));
         OnPropertyChanged(nameof(SearchBoxWatermark));
+        SearchBoxQuery = string.Empty;
         _mainWindow.SearchBox.Focus();
     }
 
@@ -157,6 +159,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public void Hide()
     {
         _mainWindow.Hide();
+        if (SearchBoxQuery != string.Empty)
+            SearchBoxQuery = string.Empty;
     }
 
     [RelayCommand]

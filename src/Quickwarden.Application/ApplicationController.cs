@@ -18,6 +18,7 @@ public class ApplicationController
     private readonly IBinaryConfigurationRepository _binaryConfigurationRepository;
     private readonly ITotpGenerator _totpGenerator;
     private readonly List<BitwardenVaultItem> _vaultItems = new();
+    private readonly List<RecentVaultEntry> _recentVaultEntries = new();
     private readonly List<Account> _accounts = [];
     private byte[] _secret = [];
     private bool _initialized;
@@ -90,7 +91,7 @@ public class ApplicationController
 
             var repos = await _bitwardenInstanceRepository.Get([result.Key]);
             await LoadVaults(repos, cancellationToken);
-            await StoreAccounts();
+            await StoreConfiguration();
 
             return SignInResult.Success;
         }
@@ -107,59 +108,52 @@ public class ApplicationController
         var account = _accounts.SingleOrDefault(a => a.Id == id);
         if (account == null)
             throw new KeyNotFoundException();
+        var vaultItemIds = _vaultItems
+                           .Where(item => item.VaultId == id)
+                           .Select(item => item.Id);
+        _recentVaultEntries.RemoveAll(item => vaultItemIds.Contains(item.Id));
+        _vaultItems.RemoveAll(item => item.VaultId == account.Id);
         var key = new BitwardenInstanceKey(account.Id, account.Username, account.Secret);
         await _bitwardenInstanceRepository.Delete(key);
         _accounts.RemoveAll(account => account.Id == id);
-        await StoreAccounts();
+        await StoreConfiguration();
     }
 
     public SearchResultItem[] Search(string query)
     {
         if (!_initialized)
             throw new ApplicationNotInitializedException();
-        if (!_accounts.Any() || string.IsNullOrWhiteSpace(query))
-            return [];
+        var recentVaultEntries = _recentVaultEntries
+            .Select(item => _vaultItems.Single(vaultItem => vaultItem.Id == item.Id));
+        if (string.IsNullOrWhiteSpace(query))
+            return ToSearchResultItems(recentVaultEntries);
 
-        var searchTerms = query.Split(' ');
-
-        return _vaultItems
-               .Where(item => searchTerms.All(term =>
-                                                  item.Name.Contains(term,
-                                                                     StringComparison
-                                                                         .InvariantCultureIgnoreCase)
-                                                  || item.Username?.Contains(term,
-                                                           StringComparison.InvariantCultureIgnoreCase)
-                                                  == true))
-               .Select(item => new SearchResultItem()
-               {
-                   Id = item.Id,
-                   Name = item.Name,
-                   Username = item.Username ?? string.Empty,
-                   HasTotp = !string.IsNullOrWhiteSpace(item.Totp),
-                   HasPassword = !string.IsNullOrWhiteSpace(item.Password),
-                   HasUsername = !string.IsNullOrWhiteSpace(item.Username),
-               }).ToArray();
+        var filteredRecent = FilterSearchResults(recentVaultEntries, query);
+        var filtered = FilterSearchResults(_vaultItems, query);
+        var allResults = filteredRecent.Concat(filtered).Distinct();
+        
+        return ToSearchResultItems(allResults);
     }
 
-    public string GetPassword(string id)
+    public async Task<string> GetPassword(string id)
     {
-        var item = GetVaultItem(id);
+        var item = await GetVaultItem(id);
         if (string.IsNullOrWhiteSpace(item.Password))
             throw new PasswordNotFoundException();
         return item.Password;
     }
 
-    public string GetUsername(string id)
+    public async Task<string> GetUsername(string id)
     {
-        var item = GetVaultItem(id);
+        var item = await GetVaultItem(id);
         if (string.IsNullOrWhiteSpace(item.Username))
             throw new UsernameNotFoundException();
         return item.Username;
     }
 
-    public ITotpCode GetTotp(string id)
+    public async Task<ITotpCode> GetTotp(string id)
     {
-        var item = GetVaultItem(id);
+        var item = await GetVaultItem(id);
         if (string.IsNullOrWhiteSpace(item.Totp))
             throw new TotpNotFoundException();
         var totp = _totpGenerator.GenerateFromSecret(item.Totp);
@@ -189,10 +183,11 @@ public class ApplicationController
             return ApplicationInitializeResult.Success;
         }
 
-        await LoadAccounts(listBytesEncrypted);
+        await LoadConfiguration(listBytesEncrypted);
 
-        var accountKeys = _accounts.Select(x => new BitwardenInstanceKey(x.Id, x.Username, x.Secret))
-                                   .ToArray();
+        var accountKeys = _accounts
+                          .Select(x => new BitwardenInstanceKey(x.Id, x.Username, x.Secret))
+                          .ToArray();
         var instances = await _bitwardenInstanceRepository.Get(accountKeys);
         await LoadVaults(instances, CancellationToken.None);
 
@@ -200,23 +195,26 @@ public class ApplicationController
         return ApplicationInitializeResult.Success;
     }
 
-    private async Task LoadAccounts(byte[] listBytesEncrypted)
+    private async Task LoadConfiguration(byte[] listBytesEncrypted)
     {
         var decryptor = new Decryptor(_secret);
         var decrypted = await decryptor.Decrypt(listBytesEncrypted);
         var configurationDeserialized =
             JsonSerializer.Deserialize<Configuration>(decrypted,
                                                       ApplicationJsonSerializerContext.Default.Configuration);
-        var accounts = configurationDeserialized.Accounts;
+        var accounts = configurationDeserialized?.Accounts ?? [];
+        var recentVaultEntries = configurationDeserialized?.RecentVaultEntries ?? [];
         _accounts.AddRange(accounts);
+        _recentVaultEntries.AddRange(recentVaultEntries);
     }
 
-    private async Task StoreAccounts()
+    private async Task StoreConfiguration()
     {
         var configuration = new Configuration()
         {
             Version = ConfigurationVersion,
             Accounts = _accounts.ToArray(),
+            RecentVaultEntries = _recentVaultEntries.ToArray(),
         };
         var serialized =
             JsonSerializer.Serialize(configuration, ApplicationJsonSerializerContext.Default.Configuration);
@@ -246,13 +244,49 @@ public class ApplicationController
         _vaultItems.AddRange(allItems);
     }
 
-    private BitwardenVaultItem GetVaultItem(string id)
+    private async Task<BitwardenVaultItem> GetVaultItem(string id)
     {
         if (!_initialized)
             throw new ApplicationNotInitializedException();
         var item = _vaultItems.SingleOrDefault(item => item.Id == id);
         if (item == null)
             throw new KeyNotFoundException();
+        var recentEntry = _recentVaultEntries.SingleOrDefault(x => x.Id == item.Id);
+        if (recentEntry != null)
+            _recentVaultEntries.Remove(recentEntry);
+        var recentVaultEntry = new RecentVaultEntry()
+        {
+            Id = id,
+        };
+        _recentVaultEntries.Insert(0, recentVaultEntry);
+        await StoreConfiguration();
         return item;
+    }
+
+    private static IEnumerable<BitwardenVaultItem> FilterSearchResults(IEnumerable<BitwardenVaultItem> results, string query)
+    {
+        var searchTerms = query.Split(' ');
+        return results
+            .Where(item => searchTerms.All(term =>
+                                               item.Name.Contains(term,
+                                                                  StringComparison
+                                                                      .InvariantCultureIgnoreCase)
+                                               || item.Username?.Contains(term,
+                                                   StringComparison.InvariantCultureIgnoreCase)
+                                               == true));
+    }
+
+    private static SearchResultItem[] ToSearchResultItems(IEnumerable<BitwardenVaultItem> instances)
+    {
+        return instances
+               .Select(item => new SearchResultItem()
+               {
+                   Id = item.Id,
+                   Name = item.Name,
+                   Username = item.Username ?? string.Empty,
+                   HasTotp = !string.IsNullOrWhiteSpace(item.Totp),
+                   HasPassword = !string.IsNullOrWhiteSpace(item.Password),
+                   HasUsername = !string.IsNullOrWhiteSpace(item.Username),
+               }).ToArray();
     }
 }

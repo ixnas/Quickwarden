@@ -146,6 +146,17 @@ public class SearchTests : IAsyncLifetime
         Assert.True(entry2.HasUsername);
         Assert.False(string.IsNullOrWhiteSpace(entry2.Id));
     }
+
+    [Fact]
+    public async Task SearchAfterSignout()
+    {
+        await SignInAccount1();
+        await SignInAccount2();
+        await _applicationController.SignOut("id1");
+        var searchResult = _applicationController.Search("Vault");
+        var result = searchResult.Single();
+        Assert.Equal("23847837", result.Id);
+    }
     
     public async Task InitializeAsync()
     {

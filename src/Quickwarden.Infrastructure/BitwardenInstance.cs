@@ -43,7 +43,7 @@ public class BitwardenInstance : IBitwardenInstance
         await ShellExecutor.ExecuteAsync(command, args, env);
     }
 
-    private async static Task<BitwardenVaultItem[]> GetVaultItems(string command, Dictionary<string, string> env)
+    private async Task<BitwardenVaultItem[]> GetVaultItems(string command, Dictionary<string, string> env)
     {
         string[] args = ["list", "items"];
         var result = await ShellExecutor.ExecuteAsync(command, args, env);
@@ -63,6 +63,7 @@ public class BitwardenInstance : IBitwardenInstance
             Password = entry.Login?.Password,
             Totp = entry.Login?.Totp,
             Notes = entry.Notes,
+            VaultId = Id,
         }).ToArray();
     }
 }

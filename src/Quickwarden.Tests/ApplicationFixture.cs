@@ -52,6 +52,7 @@ public class ApplicationFixture
             Username = "sjoerd@entry1site.com",
             Password = "password1",
             Totp = "W5WQ W3P4 3M3I 2A6M 4SSD 4SM2 SJT6 OZZH 3ASR ZURK 24JR AYU5 WSKA",
+            VaultId = "id1",
         });
         
         ((BitwardenInstanceFake)instanceWithCredentials.Instance).VaultItems.Add(new BitwardenVaultItem()
@@ -59,6 +60,7 @@ public class ApplicationFixture
             Id = "483938",
             Name = "NoPass",
             Username = "sjoerd@nopass.com",
+            VaultId = "id1",
         });
         
         ((BitwardenInstanceFake)instanceWithCredentials.Instance).VaultItems.Add(new BitwardenVaultItem()
@@ -66,6 +68,7 @@ public class ApplicationFixture
             Id = "348948",
             Name = "NoUser",
             Password = "password3",
+            VaultId = "id1",
         });
         
         BitwardenInstanceRepository.InstancesWithCredentials.Add(instanceWithCredentials);
@@ -89,6 +92,7 @@ public class ApplicationFixture
             Name = "Vault entry 2",
             Username = "hannie@entry2site.com",
             Password = "password2",
+            VaultId = "id2",
         });
 
         BitwardenInstanceRepository.InstancesWithCredentials.Add(instanceWithCredentials2);

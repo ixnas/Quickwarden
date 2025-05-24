@@ -67,26 +67,32 @@ public partial class AppViewModel : ViewModelBase
 
     private async Task Initialize()
     {
-        var result = await _application.Initialize();
-        
-        if (result == ApplicationInitializeResult.BitwardenCliNotFound)
+        try
         {
-            await
-                FatalMessageBox("Bitwarden CLI was not found.\r\nMake sure it is installed and that its installation directory is included in your PATH environment variable.");
-            return;
-        }
+            var result = await _application.Initialize();
+            if (result == ApplicationInitializeResult.BitwardenCliNotFound)
+            {
+                await
+                    FatalMessageBox("Bitwarden CLI was not found.\r\nMake sure it is installed and that its installation directory is included in your PATH environment variable.");
+                return;
+            }
 
-        if (result == ApplicationInitializeResult.CouldntWriteToKeychain)
+            if (result == ApplicationInitializeResult.CouldntWriteToKeychain)
+            {
+                var credentialsManager =
+                    OperatingSystem.IsMacOS() ? "macOS Keychain" : "Windows Credential Vault";
+                await FatalMessageBox($"Could not access your {credentialsManager}.");
+                return;
+            }
+
+            // Initialize viewmodel
+            Dispatcher.UIThread.Invoke(() => ((MainWindowViewModel)_mainWindow.DataContext)
+                                           .SetApplicationController(_application));
+        }
+        catch (Exception ex)
         {
-            var credentialsManager =
-                OperatingSystem.IsMacOS() ? "macOS Keychain" : "Windows Credential Vault";
-            await FatalMessageBox($"Could not access your {credentialsManager}.");
-            return;
+            await FatalMessageBox($"{ex.Message}\r\n\r\n${ex.StackTrace}");
         }
-
-        // Initialize viewmodel
-        Dispatcher.UIThread.Invoke(() => ((MainWindowViewModel)_mainWindow.DataContext)
-                                       .SetApplicationController(_application));
     }
 
     private async Task FatalMessageBox(string message)
