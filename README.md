@@ -61,9 +61,10 @@ The source code in the `src` directory consists of the following projects:
 - **Quickwarden.Tests** contains tests for the high level application logic.
 
 ### Packaging
-
 To create a package, run the script for your current platform in the `scripts` directory.
 The packages will be created in the `dist` directory.
+
+If you'd like to build installers on Windows, you'll have to install Inno Setup first.
 
 ## Use of Bitwarden CLI
 
