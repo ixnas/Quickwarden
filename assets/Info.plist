@@ -2,11 +2,29 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleIdentifier</key>
+	<string>nl.sjoerdscheffer.Quickwarden</string>
 	<key>CFBundleExecutable</key>
 	<string>Quickwarden.UI</string>
 	<key>CFBundleIconFile</key>
 	<string>Icon.icns</string>
-	<key>CFBundleIdentifier</key>
-	<string>nl.sjoerdscheffer.quickwarden</string>
+	<key>CFBundleDisplayName</key>
+	<string>Quickwarden</string>
+	<key>CFBundleName</key>
+	<string>Quickwarden</string>
+	<key>CFBundleVersion</key>
+	<string>%VERSION%</string>
+	<key>CFBundleShortVersionString</key>
+	<string>%VERSION%</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2025 Sjoerd Scheffer</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
 </dict>
 </plist>

@@ -1,6 +1,7 @@
 #!/bin/sh
 
 GIT_VERSION=$(git describe --tags --always)
+GIT_LAST_TAG=$(git describe --tags --always --abbrev=0)
 
 echo "-- Clean previous distribution output."
 rm -rf ../dist
@@ -9,8 +10,8 @@ cd ../src/Quickwarden.UI
 
 echo "-- Build Native AOT binaries."
 dotnet clean
-dotnet publish -r osx-x64 -c Release -p:DebugType=None -p:DebugSymbols=false
-dotnet publish -r osx-arm64 -c Release -p:DebugType=None -p:DebugSymbols=false
+dotnet publish -r osx-x64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
+dotnet publish -r osx-arm64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
 
 echo "-- Create app bundle folder structures."
 mkdir -p ../../dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS
@@ -26,8 +27,8 @@ cp bin/Release/net9.0/osx-arm64/publish/* ../../dist/quickwarden-${GIT_VERSION}-
 cd ../../
 
 echo "-- Copy Info.plist metadata into app bundles."
-cp assets/Info.plist dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/
-cp assets/Info.plist dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/
+sed -e "s/%VERSION%/${GIT_LAST_TAG}/g" assets/Info.plist > dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Info.plist
+sed -e "s/%VERSION%/${GIT_LAST_TAG}/g" assets/Info.plist > dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Info.plist
 
 echo "-- Copy icon into app bundles."
 cp assets/Icon.icns dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Resources/
