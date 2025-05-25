@@ -60,34 +60,37 @@ cp ../LICENSE.txt quickwarden-${GIT_VERSION}-macos-arm64/License.txt
 cp ../LICENSE-BW.txt "quickwarden-${GIT_VERSION}-macos-arm64/License for Bitwarden CLI.txt"
 cp ../LICENSE.txt quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/License.txt
 
-echo "-- Sign app bundles"
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/*.dylib
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/*.dylib
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/MacOS/*.dylib
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/MacOS/*.dylib
+if [ ! -z "$SIGN_CERT" ]
+then
+  echo "-- Sign app bundles"
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/*.dylib
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/*.dylib
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/MacOS/*.dylib
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/MacOS/*.dylib
 
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/bw
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/bw
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/bw
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/bw
 
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/Quickwarden.UI
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/Quickwarden.UI
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/MacOS/Quickwarden.UI
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/MacOS/Quickwarden.UI
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/Quickwarden.UI
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/Quickwarden.UI
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/MacOS/Quickwarden.UI
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/MacOS/Quickwarden.UI
 
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Info.plist
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Info.plist
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/Info.plist
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/Info.plist
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Info.plist
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Info.plist
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/Info.plist
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/Info.plist
 
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Resources/*
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Resources/*
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/Resources/*
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/Resources/*
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Resources/*
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Resources/*
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/Resources/*
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/Resources/*
 
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app
+fi
 
 echo "-- Generate DMG images."
 hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-x64 -ov -format UDZO quickwarden-${GIT_VERSION}-macos-x64.dmg
@@ -95,11 +98,14 @@ hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-maco
 hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-arm64 -ov -format UDZO quickwarden-${GIT_VERSION}-macos-arm64.dmg
 hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli -ov -format UDZO quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli.dmg
 
-echo "-- Sign DMG images"
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64.dmg
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64.dmg
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli.dmg
-codesign -fs "Sjoerd Scheffer" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli.dmg
+if [ ! -z "$SIGN_CERT" ]
+then
+  echo "-- Sign DMG images"
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64.dmg
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64.dmg
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli.dmg
+  codesign -fs "$SIGN_CERT" quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli.dmg
+fi
 
 echo "-- Cleanup."
 rm -rf quickwarden-${GIT_VERSION}-macos-x64
