@@ -26,6 +26,7 @@ cp LICENSE.txt dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli\
 
 echo "-- Download Bitwarden CLI executable into application directory."
 cd dist\quickwarden-${GIT_VERSION}-windows-x64\
+$ProgressPreference = 'SilentlyContinue'
 curl -o bw.zip "https://github.com/bitwarden/clients/releases/download/cli-v2025.4.0/bw-oss-windows-2025.4.0.zip"
 C:\Windows\System32\tar.exe -xf bw.zip
 Remove-Item bw.zip
