@@ -1,6 +1,6 @@
 #!/bin/sh
 
-GIT_VERSION=$(git describe --tags)
+GIT_VERSION=$(git describe --tags --always)
 
 echo "-- Clean previous distribution output."
 rm -rf ../dist
@@ -49,6 +49,15 @@ curl -L -o bw.zip "https://github.com/bitwarden/clients/releases/download/cli-v2
 unzip bw.zip
 rm -f bw.zip
 mv bw quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/
+
+echo "-- Copy license files."
+cp ../LICENSE.txt quickwarden-${GIT_VERSION}-macos-x64/License.txt
+cp ../LICENSE-BW.txt "quickwarden-${GIT_VERSION}-macos-x64/License for Bitwarden CLI.txt"
+cp ../LICENSE.txt quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/License.txt
+
+cp ../LICENSE.txt quickwarden-${GIT_VERSION}-macos-arm64/License.txt
+cp ../LICENSE-BW.txt "quickwarden-${GIT_VERSION}-macos-arm64/License for Bitwarden CLI.txt"
+cp ../LICENSE.txt quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/License.txt
 
 echo "-- Generate DMG images."
 hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-x64 -ov -format UDZO quickwarden-${GIT_VERSION}-macos-x64.dmg
