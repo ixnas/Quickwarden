@@ -77,8 +77,8 @@ public class ApplicationFixture
 
         var instance2 = new BitwardenInstanceFake()
         {
-            Id = key.Id,
-            Username = key.Username,
+            Id = key2.Id,
+            Username = key2.Username,
         };
 
         var instanceWithCredentials2 = new InstanceWithCredentials("hannie",

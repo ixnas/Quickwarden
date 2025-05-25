@@ -3,7 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using Quickwarden.Application;
 using Quickwarden.UI.Views;
 
@@ -25,10 +28,15 @@ public partial class MainWindowViewModel : ViewModelBase
     private CredentialListItem[] _credentials = [];
     private CredentialListItem? _selectedCredential;
     private string _searchBoxQuery = string.Empty;
+    private bool _isSyncing;
     public string SettingsShortcut => OperatingSystem.IsMacOS() ? "⌘S" : "Ctrl-S";
     public KeyGesture CopyUsernameGesture => OperatingSystem.IsMacOS()
                                                  ? new KeyGesture(Key.U, KeyModifiers.Meta)
                                                  : new KeyGesture(Key.U, KeyModifiers.Control);
+    public string SyncShortcut => OperatingSystem.IsMacOS() ? "⌘R" : "Ctrl-R";
+    public KeyGesture SyncGesture => OperatingSystem.IsMacOS()
+                                                 ? new KeyGesture(Key.R, KeyModifiers.Meta)
+                                                 : new KeyGesture(Key.R, KeyModifiers.Control);
     public string CopyUsernameShortcut => OperatingSystem.IsMacOS() ? "⌘U" : "Ctrl-U";
     public KeyGesture CopyPasswordGesture => OperatingSystem.IsMacOS()
                                                  ? new KeyGesture(Key.P, KeyModifiers.Meta)
@@ -42,6 +50,8 @@ public partial class MainWindowViewModel : ViewModelBase
                                                      ? new KeyGesture(Key.S, KeyModifiers.Meta)
                                                      : new KeyGesture(Key.S, KeyModifiers.Control);
     public bool ApplicationInitialized => _applicationController != null;
+    public string SyncShortcutLabel => IsSyncing ? " Syncing..." : " Sync";
+    public string SyncLabelColor => IsSyncing ? "#888" : "#000";
     public string SearchBoxWatermark => ApplicationInitialized ? "Search..." : "Loading...";
     public bool CopyUsernameEnabled => SelectedCredential?.HasUsername == true;
     public bool CopyPasswordEnabled => SelectedCredential?.HasPassword == true;
@@ -87,6 +97,17 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(CopyUsernameEnabled));
             OnPropertyChanged(nameof(CopyPasswordEnabled));
             OnPropertyChanged(nameof(Copy2FaEnabled));
+        }
+    }
+    private bool IsSyncing
+    {
+        get => _isSyncing;
+        set
+        {
+            _isSyncing = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(SyncShortcutLabel));
+            OnPropertyChanged(nameof(SyncLabelColor));
         }
     }
 
@@ -180,5 +201,37 @@ public partial class MainWindowViewModel : ViewModelBase
         _settingsWindow.Show();
         _settingsWindow.BringIntoView();
         _settingsWindow.Focus();
+    }
+
+    [RelayCommand]
+    private void Sync()
+    {
+        if (_applicationController == null)
+            return;
+        if (IsSyncing)
+            return;
+        Task.Run(async () =>
+        {
+            Dispatcher.UIThread.Invoke(() => IsSyncing = true);
+            try
+            {
+                await _applicationController.Sync();
+            }
+            catch (Exception ex)
+            {
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    IsSyncing = false;
+                    var box = MessageBoxManager.GetMessageBoxStandard("Error",
+                                                                      $"{ex.Message}\r\n\r\n${ex.StackTrace}",
+                                                                      ButtonEnum.Ok,
+                                                                      Icon.Error);
+                    await box.ShowWindowAsync();
+                });
+            }
+
+            Dispatcher.UIThread.Invoke(() => SearchBoxQuery = SearchBoxQuery);
+            Dispatcher.UIThread.Invoke(() => IsSyncing = false);
+        });
     }
 }

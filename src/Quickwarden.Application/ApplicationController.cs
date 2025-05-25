@@ -1,3 +1,4 @@
+using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 using Quickwarden.Application.Exceptions;
@@ -241,6 +242,8 @@ public class ApplicationController
             allItems.AddRange(items);
         }
 
+        var vaultIds = instances.Select(x => x.Id).ToArray();
+        _vaultItems.RemoveAll(item => vaultIds.Contains(item.VaultId));
         _vaultItems.AddRange(allItems);
         var itemIds = _vaultItems.Select(x => x.Id).ToArray();
         _recentVaultEntries.RemoveAll(item => !itemIds.Contains(item.Id));
@@ -290,5 +293,15 @@ public class ApplicationController
                    HasPassword = !string.IsNullOrWhiteSpace(item.Password),
                    HasUsername = !string.IsNullOrWhiteSpace(item.Username),
                }).ToArray();
+    }
+
+    public async Task Sync()
+    {
+        var keys = _accounts
+            .Select(account => new BitwardenInstanceKey(account.Id, account.Username, account.Secret))
+            .ToArray();
+        var repos = await _bitwardenInstanceRepository.Get(keys);
+        await LoadVaults(repos, CancellationToken.None);
+        await StoreConfiguration();
     }
 }

@@ -30,6 +30,7 @@
     <Window.KeyBindings>
         <KeyBinding Gesture="Escape" Command="{Binding HideCommand, Mode=OneWay}" />
         <KeyBinding Gesture="{Binding SettingsShortcutGesture}" Command="{Binding ShowSettingsCommand, Mode=OneWay}" />
+        <KeyBinding Gesture="{Binding SyncGesture}" Command="{Binding SyncCommand, Mode=OneWay}" />
     </Window.KeyBindings>
     <Window.Styles>
         <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
@@ -87,6 +88,10 @@
                 <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
                     <Run Foreground="#888" Text="{Binding SettingsShortcut}"></Run>
                     <Span> Settings...</Span>
+                </TextBlock>
+                <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
+                    <Run Foreground="#888" Text="{Binding SyncShortcut}"></Run>
+                    <Run Foreground="{Binding SyncLabelColor}" Text="{Binding SyncShortcutLabel}"></Run>
                 </TextBlock>
                 <TextBlock IsVisible="{Binding CopyUsernameEnabled}" FontSize="13" Margin="8"
                            VerticalAlignment="Center">
