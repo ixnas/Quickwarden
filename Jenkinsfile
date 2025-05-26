@@ -18,7 +18,7 @@ pipeline {
             }
             steps {
                 bat "dotnet test --no-build --logger:\"junit;LogFilePath=quickwarden-${GIT_VERSION}-unit-tests.xml\" --collect:\"XPlat Code Coverage\" --results-directory artifacts\\reports"
-                bat "move /y src\\Quickwarden.Tests\\quickwarden-${GIT_VERSION}-unit-tests-*.xml artifacts\\reports\\"
+                bat "move /y src\\Quickwarden.Tests\\quickwarden-${GIT_VERSION}-unit-tests.xml artifacts\\reports\\"
                 dir('artifacts/reports') {
                     bat "tar -a -c -f quickwarden-${GIT_VERSION}-unit-tests.zip quickwarden-${GIT_VERSION}-unit-tests.xml"
                 }
