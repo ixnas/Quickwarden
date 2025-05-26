@@ -43,20 +43,5 @@ pipeline {
                 archiveArtifacts artifacts: "dist/quickwarden-${GIT_VERSION}-windows*.zip, dist/quickwarden-${GIT_VERSION}-windows*.exe"
             }
         }
-        stage('Package (macOS)') {
-            agent { label 'macos' }
-            environment {
-                GIT_VERSION = """${sh(
-                    returnStdout: true,
-                    script: 'git describe --tags --always'
-                ).trim()}"""
-            }
-            steps {
-                dir('scripts') {
-                    sh "./build-macos.sh"
-                }
-                archiveArtifacts artifacts: "dist/quickwarden-${GIT_VERSION}-macos*.dmg"
-            }
-        }
     }
 }
