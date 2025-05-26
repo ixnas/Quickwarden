@@ -180,7 +180,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public void Hide()
     {
         _mainWindow.Hide();
-        if (SearchBoxQuery != string.Empty)
+        if (_applicationController != null)
             SearchBoxQuery = string.Empty;
     }
 
