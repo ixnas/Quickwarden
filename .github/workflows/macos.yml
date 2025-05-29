@@ -39,8 +39,8 @@ jobs:
           mkdir -p dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Resources
           mkdir -p dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS
           mkdir -p dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Resources
-          cp src/Quickwarden.UI/bin/Release/net9.0/osx-x64/publish/* dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/
-          cp src/Quickwarden.UI/bin/Release/net9.0/osx-arm64/publish/* dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/
+          cp src/Quickwarden.UI/bin/Release/net9.0/osx-x64/publish/* dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/ || true
+          cp src/Quickwarden.UI/bin/Release/net9.0/osx-arm64/publish/* dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/ || true
           sed -e "s/%VERSION%/${GIT_LAST_TAG}/g" assets/Info.plist > dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Info.plist
           sed -e "s/%VERSION%/${GIT_LAST_TAG}/g" assets/Info.plist > dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Info.plist
           cp assets/Icon.icns dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Resources/
