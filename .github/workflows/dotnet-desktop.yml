@@ -113,6 +113,7 @@ jobs:
     # Create installer
     - name: Create installer
       run: |
+        Set-PSDebug -Trace 1
         git describe --tags --always | Tee-Object -Variable GIT_VERSION
         git describe --tags --always --abbrev=0 | Tee-Object -Variable GIT_LAST_TAG
         $ProgressPreference = 'SilentlyContinue'
@@ -122,6 +123,7 @@ jobs:
         echo "/DMyAppSetupFileNameBase=`"quickwarden-${GIT_VERSION}-windows-x64-setup`""
         & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=`"${GIT_VERSION}`"" "/DMyAppSourceDir=`"${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64`"" "/DMyAppSetupFileNameBase=`"quickwarden-${GIT_VERSION}-windows-x64-setup`"" "/DMyAppLicenseFile=`"${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64\LICENSE.txt`"" "/DMyAppSetupOutputDir=`"${GITHUB_WORKSPACE}\dist`"" scripts\build-installer.iss
         & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=`"${GIT_VERSION}`"" "/DMyAppSourceDir=`"${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli`"" "/DMyAppSetupFileNameBase=`"quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli-setup`"" "/DMyAppLicenseFile=`"${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli\LICENSE.txt`"" "/DMyAppSetupOutputDir=`"${GITHUB_WORKSPACE}\dist`"" scripts\build-installer.iss
+        Set-PSDebug -Trace 0
 
     # Sign installer
     - name: Sign installer
