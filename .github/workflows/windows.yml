@@ -6,12 +6,8 @@ jobs:
 
   build:
 
-    strategy:
-      matrix:
-        configuration: [Release]
-
-    runs-on: windows-latest  # For a list of available runner types, refer to
-                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    runs-on: windows-latest
+    
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -25,7 +21,7 @@ jobs:
         dotnet-version: 9.0.x
 
     # Execute all unit tests in the solution
-    - name: Execute unit tests
+    - name: Unit tests
       run: dotnet test
 
     # Create the app package by building and packaging the Windows Application Packaging project
@@ -35,7 +31,7 @@ jobs:
         git describe --tags --always --abbrev=0 | Tee-Object -Variable GIT_LAST_TAG
         cd src\Quickwarden.UI
         dotnet publish -r win-x64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
-        cd ..
+        cd ..\..
 
     # Create dist folders
     - name: Create distribution folders

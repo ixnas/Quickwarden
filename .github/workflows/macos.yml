@@ -1,0 +1,159 @@
+name: macOS build
+
+on: push
+
+jobs:
+
+  build:
+
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Install .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      
+      - name: Unit tests
+        run: dotnet test
+      
+      - name: Compile
+        run: |
+          export GIT_VERSION=$(git describe --tags --always)
+          export GIT_LAST_TAG=$(git describe --tags --always --abbrev=0)
+          cd src/Quickwarden.UI
+          dotnet publish -r osx-x64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
+          dotnet publish -r osx-arm64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
+          cd ../..
+      
+      - name: Create app bundles
+        run: |
+          export GIT_VERSION=$(git describe --tags --always)
+          export GIT_LAST_TAG=$(git describe --tags --always --abbrev=0)
+          mkdir -p dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS
+          mkdir -p dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Resources
+          mkdir -p dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS
+          mkdir -p dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Resources
+          cp src/Quickwarden.UI/bin/Release/net9.0/osx-x64/publish/* dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/
+          cp src/Quickwarden.UI/bin/Release/net9.0/osx-arm64/publish/* dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/
+          sed -e "s/%VERSION%/${GIT_LAST_TAG}/g" assets/Info.plist > dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Info.plist
+          sed -e "s/%VERSION%/${GIT_LAST_TAG}/g" assets/Info.plist > dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Info.plist
+          cp assets/Icon.icns dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Resources/
+          cp assets/Icon.icns dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Resources/
+          cp -r dist/quickwarden-${GIT_VERSION}-macos-x64 dist/quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli
+          cp -r dist/quickwarden-${GIT_VERSION}-macos-arm64 dist/quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli
+      
+      - name: Download Bitwarden CLI
+        run: |
+          export GIT_VERSION=$(git describe --tags --always)
+          export GIT_LAST_TAG=$(git describe --tags --always --abbrev=0)
+          curl -L -o bw.zip "https://github.com/bitwarden/clients/releases/download/cli-v2025.4.0/bw-oss-macos-2025.4.0.zip"
+          unzip bw.zip
+          rm -f bw.zip
+          mv bw dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/
+          curl -L -o bw.zip "https://github.com/bitwarden/clients/releases/download/cli-v2025.4.0/bw-oss-macos-arm64-2025.4.0.zip"
+          unzip bw.zip
+          rm -f bw.zip
+          mv bw dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/
+      
+      - name: Copy licenses
+        run: |
+          export GIT_VERSION=$(git describe --tags --always)
+          export GIT_LAST_TAG=$(git describe --tags --always --abbrev=0)
+          cp LICENSE.txt dist/quickwarden-${GIT_VERSION}-macos-x64/License.txt
+          cp LICENSE-BW.txt "dist/quickwarden-${GIT_VERSION}-macos-x64/License for Bitwarden CLI.txt"
+          cp LICENSE.txt dist/quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/License.txt
+          cp LICENSE.txt dist/quickwarden-${GIT_VERSION}-macos-arm64/License.txt
+          cp LICENSE-BW.txt "dist/quickwarden-${GIT_VERSION}-macos-arm64/License for Bitwarden CLI.txt"
+          cp LICENSE.txt dist/quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/License.txt
+          
+      - name: Install code signing certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE }}
+          P12_PASSWORD: ${{ secrets.PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+      
+      - name: Sign app bundle
+        env:
+          SIGN_CERT: ${{ secrets.CERTNAME }}
+        run: |
+          export GIT_VERSION=$(git describe --tags --always)
+          export GIT_LAST_TAG=$(git describe --tags --always --abbrev=0)
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/*.dylib
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/*.dylib
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/MacOS/*.dylib
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/MacOS/*.dylib
+
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/bw
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/bw
+
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS/Quickwarden.UI
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/MacOS/Quickwarden.UI
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/MacOS/Quickwarden.UI
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/MacOS/Quickwarden.UI
+
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Info.plist
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Info.plist
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/Info.plist
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/Info.plist
+
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/Resources/*
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app/Contents/Resources/*
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app/Contents/Resources/*
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app/Contents/Resources/*
+
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64/Quickwarden.app
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli/Quickwarden.app
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli/Quickwarden.app
+      
+      - name: Create disk images
+        run: |
+          export GIT_VERSION=$(git describe --tags --always)
+          export GIT_LAST_TAG=$(git describe --tags --always --abbrev=0)
+          cd dist
+          hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-x64 -ov -format UDZO quickwarden-${GIT_VERSION}-macos-x64.dmg
+          hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli -ov -format UDZO quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli.dmg
+          hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-arm64 -ov -format UDZO quickwarden-${GIT_VERSION}-macos-arm64.dmg
+          hdiutil create -volname "Quickwarden" -srcfolder quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli -ov -format UDZO quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli.dmg
+          rm -rf quickwarden-${GIT_VERSION}-*/
+          cd ..
+      
+      - name: Sign disk images
+        env:
+          SIGN_CERT: ${{ secrets.CERTNAME }}
+        run: |
+          export GIT_VERSION=$(git describe --tags --always)
+          export GIT_LAST_TAG=$(git describe --tags --always --abbrev=0)
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64.dmg
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64.dmg
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-x64-no-bw-cli.dmg
+          codesign -fs "$SIGN_CERT" dist/quickwarden-${GIT_VERSION}-macos-arm64-no-bw-cli.dmg
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS distribution
+          path: dist
