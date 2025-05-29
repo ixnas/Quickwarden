@@ -100,7 +100,7 @@ jobs:
 
     # Sign binaries
     - name: Sign binaries
-      uses: skymatic/code-sign-action@v1
+      uses: skymatic/code-sign-action@v3
       with:
         certificate: '${{ secrets.CERTIFICATE }}'
         password: '${{ secrets.PASSWORD }}'
