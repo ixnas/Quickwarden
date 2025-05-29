@@ -31,13 +31,3 @@ $ProgressPreference = 'SilentlyContinue'
 curl -o bw.zip "https://github.com/bitwarden/clients/releases/download/cli-v2025.4.0/bw-oss-windows-2025.4.0.zip"
 C:\Windows\System32\tar.exe -xf bw.zip
 Remove-Item bw.zip
-
-cd ..\
-
-echo "-- Build installers."
-& 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=`"${GIT_VERSION}`"" "/DMyAppSourceDir=`"${PWD}\quickwarden-${GIT_VERSION}-windows-x64`"" "/DMyAppSetupFileNameBase=`"quickwarden-${GIT_VERSION}-windows-x64-setup`"" "/DMyAppLicenseFile=`"${PWD}\quickwarden-${GIT_VERSION}-windows-x64\LICENSE.txt`"" "/DMyAppSetupOutputDir=`"${PWD}`"" ..\scripts\build-installer.iss
-& 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=`"${GIT_VERSION}`"" "/DMyAppSourceDir=`"${PWD}\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli`"" "/DMyAppSetupFileNameBase=`"quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli-setup`"" "/DMyAppLicenseFile=`"${PWD}\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli\LICENSE.txt`"" "/DMyAppSetupOutputDir=`"${PWD}`"" ..\scripts\build-installer.iss
-
-echo "-- Build zip files."
-C:\Windows\System32\tar.exe -a -c -f quickwarden-${GIT_VERSION}-windows-x64.zip quickwarden-${GIT_VERSION}-windows-x64
-C:\Windows\System32\tar.exe -a -c -f quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli.zip quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli

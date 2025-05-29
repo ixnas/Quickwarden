@@ -14,10 +14,15 @@ Quickly search through your Bitwarden vaults.
 
 ## Contents
 - [Installing a release](#installing-a-release)
+  - [Windows](#windows)
+  - [macOS](#macos)
 - [Usage](#usage)
 - [Building from source](#building-from-source)
   - [Development](#development)
   - [Packaging](#packaging)
+- [Security](#security)
+- [Disclaimer](#disclaimer)
+- [Contributing](#contributing)
 - [Use of Bitwarden CLI](#use-of-bitwarden-cli)
 
 ## Installing a release
@@ -28,16 +33,29 @@ Every release is built for the following platforms:
 - macOS arm64 (Apple Silicon)
 - macOS x64 (Intel)
 
-Go to the [releases page](https://github.com/ixnas/Quickwarden/releases) and download the latest release for your platform.
+### Windows
 
-**Windows**: Run the installer.
+Go to the [releases page](https://github.com/ixnas/Quickwarden/releases) and download the latest installer.
+This would be the file that's called `quickwarden-<version>-windows-x64-setup.exe`.
 
-**macOS**: Open the disk image and copy the application to your Applications folder.
+Run the installer.
+If a Windows Defender dialog pops up, click "More info" and then click "Run anyway".
 
-There are no external dependencies because Bitwarden CLI is bundled with these distributions.
+### macOS
 
-You may also use the distribution that doesn't contain the Bitwarden CLI.
-In that case, you'll have to install Bitwarden CLI yourself, and make sure that its installation directory is included in your `PATH` environment variable.
+Go to the [releases page](https://github.com/ixnas/Quickwarden/releases) and download the latest release for your platform:
+
+- For Apple Silicon Macs, download `quickwarden-<version>-macos-arm64.dmg`.
+- For Intel-based Macs, download `quickwarden-<version>-macos-x64.dmg`.
+
+Open the disk image by right-clicking it and clicking Open.
+
+Because this application is not signed and notarized by Apple, you'll have to manually allow the downloaded disk image to open.
+Open System Settings and go to "Privacy & Security".
+Scroll to the Security section and click "Open anyway".
+
+Now you can copy the application to your Applications folder and eject the disk image.
+You may have to repeat the steps above when you launch Quickwarden for the first time.
 
 ## Usage
 When you first start Quickwarden on macOS you might have to grant access to the Accessibility API.
@@ -67,6 +85,40 @@ To create a package, run the script for your current platform in the `scripts` d
 The packages will be created in the `dist` directory.
 
 If you'd like to build installers on Windows, you'll have to install Inno Setup first.
+
+## Security
+
+This application uses Bitwarden CLI under the hood.
+When you sign in, Quickwarden will pass your credentials to Bitwarden CLI.
+Your credentials won't ever be stored by Quickwarden, they will only be used to obtain a session key from Bitwarden CLI.
+
+This session key is used to access your vault through the Bitwarden CLI.
+Quickwarden will load your vault into memory, it will never store any vault data.
+
+Any other data that Quickwarden needs to operate is always stored fully encrypted using AES encryption.
+This currently consists of:
+
+ - E-mail addresses for signed-in users
+ - Bitwarden CLI vault location and session keys
+ - IDs of your most recently used vault items
+
+The key to unlock this data is securely stored in your platform's credential manager.
+On Windows Quickwarden will use the Windows Hello, on macOS it'll use Keychain.
+
+The binary releases are currently signed with a self-signed certificate.
+This ensures that only these signed binary releases are able to unlock Quickwarden's encrypted data.
+Other applications won't be able to access this data unless if you're on macOS and specifically allow another app to access Quickwarden's keychain entry.
+
+## Disclaimer
+
+This software is an independent project and not affiliated with Bitwarden in any way.
+Use this software at your own risk.
+I am not responsible for any lost or stolen credentials as a result of using this application.
+
+## Contributing
+
+If you have any suggestions for improvements or new features, especially when it comes to security, please open a new issue.
+I'll try to get to them as soon as I can.
 
 ## Use of Bitwarden CLI
 
