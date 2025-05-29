@@ -1,5 +1,6 @@
 # Quickwarden
-[![Build status](https://ci.sjoerdscheffer.nl/job/Quickwarden/job/main/badge/icon?style=flat-square)](https://ci.sjoerdscheffer.nl/job/Quickwarden/job/main/)
+[![macOS build](https://github.com/ixnas/Quickwarden/actions/workflows/macos.yml/badge.svg)](https://github.com/ixnas/Quickwarden/actions/workflows/macos.yml)
+[![Windows build](https://github.com/ixnas/Quickwarden/actions/workflows/windows.yml/badge.svg)](https://github.com/ixnas/Quickwarden/actions/workflows/windows.yml)
 
 Quickly search through your Bitwarden vaults.
 
