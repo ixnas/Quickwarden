@@ -66,10 +66,6 @@ jobs:
     - name: Execute unit tests
       run: dotnet test
 
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
-    - name: Restore the application
-      run: dotnet restore -c Release
-
     # Create the app package by building and packaging the Windows Application Packaging project
     - name: Compile
       run: |
