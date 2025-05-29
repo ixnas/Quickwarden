@@ -81,8 +81,8 @@ jobs:
         Invoke-WebRequest -Uri "https://jrsoftware.org/download.php/is.exe" -OutFile "is.exe"
         Start-Process -FilePath ".\is.exe" -ArgumentList "/VERYSILENT" -Wait
         rm is.exe
-        & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' /V10 "/DMyAppVersion=`"${GIT_VERSION}`"" "/DMyAppSourceDir=`"${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64`"" "/DMyAppSetupFileNameBase=`"quickwarden-${GIT_VERSION}-windows-x64-setup`"" "/DMyAppLicenseFile=`"${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64\LICENSE.txt`"" "/DMyAppSetupOutputDir=`"${GITHUB_WORKSPACE}\dist`"" scripts\build-installer.iss
-        & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' /V10 "/DMyAppVersion=`"${GIT_VERSION}`"" "/DMyAppSourceDir=`"${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli`"" "/DMyAppSetupFileNameBase=`"quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli-setup`"" "/DMyAppLicenseFile=`"${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli\LICENSE.txt`"" "/DMyAppSetupOutputDir=`"${GITHUB_WORKSPACE}\dist`"" scripts\build-installer.iss
+        & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=${GIT_VERSION}" "/DMyAppSourceDir=${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64" "/DMyAppSetupFileNameBase=quickwarden-${GIT_VERSION}-windows-x64-setup" "/DMyAppLicenseFile=${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64\LICENSE.txt" "/DMyAppSetupOutputDir=${GITHUB_WORKSPACE}\dist" scripts\build-installer.iss
+        & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=${GIT_VERSION}" "/DMyAppSourceDir=${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli" "/DMyAppSetupFileNameBase=quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli-setup" "/DMyAppLicenseFile=${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli\LICENSE.txt" "/DMyAppSetupOutputDir=${GITHUB_WORKSPACE}\dist" scripts\build-installer.iss
 
     # Sign installer
     - name: Sign installer

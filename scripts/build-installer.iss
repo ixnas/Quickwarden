@@ -16,14 +16,14 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{05D86BEC-A976-492D-8008-9893B5F377EE}
 AppName={#MyAppName}
-AppVersion={#MyAppVersion}
+AppVersion="{#MyAppVersion}"
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}
-UninstallDisplayIcon={app}\{#MyAppExeName}
+DefaultDirName="{autopf}\{#MyAppName}"
+UninstallDisplayIcon="{app}\{#MyAppExeName}"
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
 ; on anything but x64 and Windows 11 on Arm.
 ArchitecturesAllowed=x64compatible
@@ -33,13 +33,13 @@ ArchitecturesAllowed=x64compatible
 ; the 64-bit view of the registry.
 ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
-LicenseFile={#MyAppLicenseFile}
+LicenseFile="{#MyAppLicenseFile}"
 ; Remove the following line to run in administrative install mode (install for all users).
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir={#MyAppSetupOutputDir}
-SourceDir={#MyAppSourceDir}
-OutputBaseFilename={#MyAppSetupFileNameBase}
+OutputDir="{#MyAppSetupOutputDir}"
+SourceDir="{#MyAppSourceDir}"
+OutputBaseFilename="{#MyAppSetupFileNameBase}"
 SetupIconFile=C:\Program Files (x86)\Inno Setup 6\SetupClassicIcon.ico
 SolidCompression=yes
 WizardStyle=modern

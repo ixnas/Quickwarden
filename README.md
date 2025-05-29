@@ -1,4 +1,5 @@
 # Quickwarden
+[![Build status](https://ci.sjoerdscheffer.nl/job/Quickwarden/job/main/badge/icon?style=flat-square)](https://ci.sjoerdscheffer.nl/job/Quickwarden/job/main/)
 
 Quickly search through your Bitwarden vaults.
 
