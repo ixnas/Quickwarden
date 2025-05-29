@@ -33,7 +33,9 @@ jobs:
       run: |
         git describe --tags --always | Tee-Object -Variable GIT_VERSION
         git describe --tags --always --abbrev=0 | Tee-Object -Variable GIT_LAST_TAG
+        cd src\Quickwarden.UI
         dotnet publish -r win-x64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
+        cd ..
 
     # Create dist folders
     - name: Create distribution folders
@@ -81,8 +83,8 @@ jobs:
         Invoke-WebRequest -Uri "https://jrsoftware.org/download.php/is.exe" -OutFile "is.exe"
         Start-Process -FilePath ".\is.exe" -ArgumentList "/VERYSILENT" -Wait
         rm is.exe
-        & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=${GIT_VERSION}" "/DMyAppSourceDir=${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64" "/DMyAppSetupFileNameBase=quickwarden-${GIT_VERSION}-windows-x64-setup" "/DMyAppLicenseFile=${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64\LICENSE.txt" "/DMyAppSetupOutputDir=${GITHUB_WORKSPACE}\dist" scripts\build-installer.iss
-        & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=${GIT_VERSION}" "/DMyAppSourceDir=${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli" "/DMyAppSetupFileNameBase=quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli-setup" "/DMyAppLicenseFile=${GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli\LICENSE.txt" "/DMyAppSetupOutputDir=${GITHUB_WORKSPACE}\dist" scripts\build-installer.iss
+        & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=${GIT_VERSION}" "/DMyAppSourceDir=${Env:GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64" "/DMyAppSetupFileNameBase=quickwarden-${GIT_VERSION}-windows-x64-setup" "/DMyAppLicenseFile=${Env:GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64\LICENSE.txt" "/DMyAppSetupOutputDir=${Env:GITHUB_WORKSPACE}\dist" scripts\build-installer.iss
+        & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' "/DMyAppVersion=${GIT_VERSION}" "/DMyAppSourceDir=${Env:GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli" "/DMyAppSetupFileNameBase=quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli-setup" "/DMyAppLicenseFile=${Env:GITHUB_WORKSPACE}\dist\quickwarden-${GIT_VERSION}-windows-x64-no-bw-cli\LICENSE.txt" "/DMyAppSetupOutputDir=${Env:GITHUB_WORKSPACE}\dist" scripts\build-installer.iss
 
     # Sign installer
     - name: Sign installer
