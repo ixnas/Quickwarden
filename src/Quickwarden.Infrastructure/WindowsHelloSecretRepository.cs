@@ -1,7 +1,8 @@
 ﻿#if WINDOWS
-using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Pkcs;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
 using Windows.Security.Credentials;
@@ -18,7 +19,7 @@ public class WindowsHelloSecretRepository : ISecretRepository
         var isSupported = await KeyCredentialManager.IsSupportedAsync();
         if (!isSupported)
             return null;
-        var credentialKey = GetCredentialKey();
+        var credentialKey = await GetCredentialKey();
         var previousSecret = await KeyCredentialManager.OpenAsync(credentialKey);
         if (previousSecret.Status == KeyCredentialStatus.NotFound)
         {
@@ -34,10 +35,9 @@ public class WindowsHelloSecretRepository : ISecretRepository
         return ToApplicationSecret(previousSecret.Credential);
     }
 
-    private static string GetCredentialKey()
+    private static async Task<string> GetCredentialKey()
     {
-        var publicKeyToken = Assembly.GetExecutingAssembly().GetName().GetPublicKeyToken() ?? [];
-        var publicKeyTokenString = Convert.ToHexString(publicKeyToken);
+        var publicKeyTokenString = await GetCertificateKey();
         var userSid = WindowsIdentity.GetCurrent().User?.Value ?? "no-user";
         var keyMaterial = $"Quickwarden-{publicKeyTokenString}-{userSid}";
         var keyMaterialBytes = Encoding.UTF8.GetBytes(keyMaterial);
@@ -50,6 +50,29 @@ public class WindowsHelloSecretRepository : ISecretRepository
         var byteArray = credential.RetrievePublicKey().ToArray();
         var shaByteArray = SHA256.HashData(byteArray);
         return Convert.ToHexString(shaByteArray);
+    }
+
+    private static async Task<string> GetCertificateKey()
+    {
+        SignedCms signedCms = new SignedCms();
+        if (string.IsNullOrWhiteSpace(Environment.ProcessPath))
+            return string.Empty;
+        
+        var assembly = await File.ReadAllBytesAsync(Environment.ProcessPath);
+        try
+        {
+            signedCms.Decode(assembly);
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+        var certificate = signedCms.Certificates[0];
+        var publicKey = certificate?.GetRSAPublicKey();
+        var publicKeyBytes = Encoding.UTF8.GetBytes(publicKey?.ToXmlString(false) ?? string.Empty);
+        var keyHash = SHA256.HashData(publicKeyBytes);
+
+        return Convert.ToBase64String(keyHash);
     }
 }
 #else
