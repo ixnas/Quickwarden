@@ -20,15 +20,15 @@ jobs:
           dotnet-version: 9.0.x
       
       - name: Unit tests
-        run: dotnet test
+        run: dotnet test -f net9.0
       
       - name: Compile
         run: |
           export GIT_VERSION=$(git describe --tags --always)
           export GIT_LAST_TAG=$(git describe --tags --always --abbrev=0)
           cd src/Quickwarden.UI
-          dotnet publish -r osx-x64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
-          dotnet publish -r osx-arm64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
+          dotnet publish -r osx-x64 -c Release -f net9.0 -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
+          dotnet publish -r osx-arm64 -c Release -f net9.0 -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
           cd ../..
       
       - name: Create app bundles
