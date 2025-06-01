@@ -1,7 +1,6 @@
 ﻿#if WINDOWS
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Security.Cryptography;
-using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
@@ -54,25 +53,22 @@ public class WindowsHelloSecretRepository : ISecretRepository
 
     private static async Task<string> GetCertificateKey()
     {
-        SignedCms signedCms = new SignedCms();
         if (string.IsNullOrWhiteSpace(Environment.ProcessPath))
             return string.Empty;
-        
-        var assembly = await File.ReadAllBytesAsync(Environment.ProcessPath);
         try
         {
-            signedCms.Decode(assembly);
+            var executingCert = X509Certificate.CreateFromSignedFile(Environment.ProcessPath);
+            if (executingCert == null)
+                return string.Empty;
+            var assemblyKey = executingCert.GetPublicKey();
+            var keyHash = SHA256.HashData(assemblyKey);
+
+            return Convert.ToBase64String(keyHash);
         }
-        catch (Exception)
+        catch (CryptographicException)
         {
             return string.Empty;
         }
-        var certificate = signedCms.Certificates[0];
-        var publicKey = certificate?.GetRSAPublicKey();
-        var publicKeyBytes = Encoding.UTF8.GetBytes(publicKey?.ToXmlString(false) ?? string.Empty);
-        var keyHash = SHA256.HashData(publicKeyBytes);
-
-        return Convert.ToBase64String(keyHash);
     }
 }
 #else
