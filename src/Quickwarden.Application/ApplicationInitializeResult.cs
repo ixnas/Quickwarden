@@ -3,6 +3,6 @@ namespace Quickwarden.Application;
 public enum ApplicationInitializeResult
 {
     Success,
-    CouldntWriteToKeychain,
+    CouldntAccessKeychain,
     BitwardenCliNotFound
 }

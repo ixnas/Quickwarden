@@ -30,49 +30,11 @@ public class AppInitializeTests
     }
 
     [Fact]
-    public async Task SetsSecret()
+    public async Task DenyAccess()
     {
-        await _applicationController.Initialize();
-        Assert.NotNull(_fixture.SecretRepository.Secret);
-        Assert.NotEmpty(_fixture.SecretRepository.Secret);
-    }
-
-    [Fact]
-    public async Task SecretIsRandom()
-    {
-        var initResult1 = await _applicationController.Initialize();
-        Assert.Equal(ApplicationInitializeResult.Success, initResult1);
-        var secret1 = _fixture.SecretRepository.Secret;
-        var app2 = _fixture.CreateApplicationController();
-
-        _fixture.SecretRepository.Secret = null;
-
-        var initResult2 = await app2.Initialize();
-        Assert.Equal(ApplicationInitializeResult.Success, initResult2);
-        var secret2 = _fixture.SecretRepository.Secret;
-
-        Assert.NotEqual(secret1, secret2);
-    }
-
-    [Fact]
-    public async Task ReusesPreviouslyStoredSecret()
-    {
-        await _applicationController.Initialize();
-        var secret1 = _fixture.SecretRepository.Secret;
-
-        var app2 = _fixture.CreateApplicationController();
-        await app2.Initialize();
-        var secret2 = _fixture.SecretRepository.Secret;
-
-        Assert.Equal(secret1, secret2);
-    }
-
-    [Fact]
-    public async Task DenyWriteAccess()
-    {
-        _fixture.SecretRepository.CanStore = false;
+        _fixture.SecretRepository.CanGet = false;
         var result = await _applicationController.Initialize();
-        Assert.Equal(ApplicationInitializeResult.CouldntWriteToKeychain, result);
+        Assert.Equal(ApplicationInitializeResult.CouldntAccessKeychain, result);
     }
 
     [Fact]
@@ -112,7 +74,7 @@ public class AppInitializeTests
         var result = await app2.Initialize();
         Assert.Equal(ApplicationInitializeResult.Success, result);
     }
-
+    
     [Fact]
     public async Task InitializeTwice()
     {

@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
@@ -48,10 +49,10 @@ public class ApplicationController
 
         await _environment.Initialize();
         var previousSecret = await _secretRepository.Get();
-        if (previousSecret != null)
-            return await InitializeFromPreviousState(previousSecret);
-
-        return await InitializeFromScratch();
+        if (previousSecret == null)
+            return ApplicationInitializeResult.CouldntAccessKeychain;
+        
+        return await InitializeFromPreviousState(previousSecret);
     }
 
     public AccountListModel[] GetAccounts()
@@ -161,19 +162,6 @@ public class ApplicationController
         return totp;
     }
 
-    private async Task<ApplicationInitializeResult> InitializeFromScratch()
-    {
-        var secret = GenerateSecret();
-        _secret = Convert.FromHexString(secret);
-
-        var couldWrite = await _secretRepository.Store(secret);
-        if (!couldWrite)
-            return ApplicationInitializeResult.CouldntWriteToKeychain;
-
-        _initialized = true;
-        return ApplicationInitializeResult.Success;
-    }
-
     private async Task<ApplicationInitializeResult> InitializeFromPreviousState(string previousSecret)
     {
         _secret = Convert.FromHexString(previousSecret);
@@ -199,14 +187,20 @@ public class ApplicationController
     private async Task LoadConfiguration(byte[] listBytesEncrypted)
     {
         var decryptor = new Decryptor(_secret);
-        var decrypted = await decryptor.Decrypt(listBytesEncrypted);
-        var configurationDeserialized =
-            JsonSerializer.Deserialize<Configuration>(decrypted,
-                                                      ApplicationJsonSerializerContext.Default.Configuration);
-        var accounts = configurationDeserialized?.Accounts ?? [];
-        var recentVaultEntries = configurationDeserialized?.RecentVaultEntries ?? [];
-        _accounts.AddRange(accounts);
-        _recentVaultEntries.AddRange(recentVaultEntries);
+        try
+        {
+            var decrypted = await decryptor.Decrypt(listBytesEncrypted);
+            var configurationDeserialized =
+                JsonSerializer.Deserialize<Configuration>(decrypted,
+                    ApplicationJsonSerializerContext.Default.Configuration);
+            var accounts = configurationDeserialized?.Accounts ?? [];
+            var recentVaultEntries = configurationDeserialized?.RecentVaultEntries ?? [];
+            _accounts.AddRange(accounts);
+            _recentVaultEntries.AddRange(recentVaultEntries);
+        }
+        catch (CryptographicException)
+        {
+        }
     }
 
     private async Task StoreConfiguration()
@@ -223,14 +217,6 @@ public class ApplicationController
         var encryptor = new Encryptor(_secret);
         var encrypted = await encryptor.Encrypt(bytes);
         await _binaryConfigurationRepository.Store(encrypted);
-    }
-
-    private static string GenerateSecret()
-    {
-        var bytes = new byte[32];
-        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
-        rng.GetBytes(bytes);
-        return Convert.ToHexString(bytes);
     }
 
     private async Task LoadVaults(IBitwardenInstance[] instances, CancellationToken cancellationToken)

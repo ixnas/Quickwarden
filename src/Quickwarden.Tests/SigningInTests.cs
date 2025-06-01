@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text;
 using Quickwarden.Application;
 using Quickwarden.Application.Exceptions;
@@ -130,6 +131,24 @@ public class SigningInTests
         var accounts = _applicationController.GetAccounts();
         Assert.Equal([new AccountListModel(firstUser.Key.Id, firstUser.Username), new AccountListModel(secondUser.Key.Id, secondUser.Username)], accounts);
     }
+    
+    [Fact]
+    public async Task CorruptedConfigurationDiscarded()
+    {
+        await _applicationController.Initialize();
+        var firstUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.First();
+        var firstUserResult = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp, CancellationToken.None);
+        Assert.Equal(SignInResult.Success, firstUserResult);
+        
+        var randomBytes = RandomNumberGenerator.GetBytes(64);
+        await _fixture.BinaryConfigurationRepository.Store(randomBytes);
+        
+        var app2 = _fixture.CreateApplicationController();
+        var result = await app2.Initialize();
+        Assert.Equal(ApplicationInitializeResult.Success, result);
+        Assert.Empty(app2.GetAccounts());
+    }
+
 
     [Fact]
     public async Task SavesEncrypted()

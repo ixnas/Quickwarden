@@ -8,7 +8,7 @@ cd ..\src\Quickwarden.UI
 
 echo "-- Build Native AOT binaries."
 dotnet clean
-dotnet publish -r win-x64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
+dotnet publish -r win-x64 -c Release -f net9.0-windows10.0.19041.0 -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
 
 echo "-- Create application directories."
 New-Item -ItemType Directory -Path ..\..\dist\quickwarden-${GIT_VERSION}-windows-x64 -Force

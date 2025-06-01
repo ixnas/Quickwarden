@@ -28,7 +28,7 @@ public partial class AppViewModel : ViewModelBase
         //                                          fixture.BinaryConfigurationRepository,
         //                                          new TotpGenerator(fixture.StaticClock),
         //                                          new QuickwardenEnvironmentFake());
-        _application = new ApplicationController(new SecretRepository(),
+        _application = new ApplicationController(SecretRepositoryFactory.Create(),
                                                  new BitwardenInstanceRepository(),
                                                  new BinaryConfigurationRepository(),
                                                  new TotpGenerator(new DefaultClock()),
@@ -77,11 +77,12 @@ public partial class AppViewModel : ViewModelBase
                 return;
             }
 
-            if (result == ApplicationInitializeResult.CouldntWriteToKeychain)
+            if (result == ApplicationInitializeResult.CouldntAccessKeychain)
             {
-                var credentialsManager =
-                    OperatingSystem.IsMacOS() ? "macOS Keychain" : "Windows Credential Vault";
-                await FatalMessageBox($"Could not access your {credentialsManager}.");
+                if (OperatingSystem.IsMacOS())
+                    await FatalMessageBox("Could not access your macOS Keychain.");
+                else
+                    await FatalMessageBox("Windows Hello authentication failed.");
                 return;
             }
 
@@ -91,7 +92,7 @@ public partial class AppViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await FatalMessageBox($"{ex.Message}\r\n\r\n${ex.StackTrace}");
+            await FatalMessageBox($"{ex.GetType().Name}: {ex.Message}\r\n\r\n${ex.StackTrace}");
         }
     }
 
