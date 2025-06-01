@@ -41,7 +41,7 @@ public class WindowsHelloSecretRepository : ISecretRepository
         var keyMaterial = $"Quickwarden-{publicKeyTokenString}-{userSid}";
         var keyMaterialBytes = Encoding.UTF8.GetBytes(keyMaterial);
         var hash = SHA256.HashData(keyMaterialBytes);
-        return Convert.ToBase64String(hash);
+        return Convert.ToHexString(hash);
     }
 
     private static string ToApplicationSecret(KeyCredential credential)
