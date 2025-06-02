@@ -14,7 +14,7 @@ namespace Quickwarden.Application;
 public class ApplicationController
 {
     private const int ConfigurationVersion = 0;
-    private readonly ISecretRepository _secretRepository;
+    private readonly IEncryptionManager _encryptionManager;
     private readonly IQuickwardenEnvironment _environment;
     private readonly IBitwardenInstanceRepository _bitwardenInstanceRepository;
     private readonly IBinaryConfigurationRepository _binaryConfigurationRepository;
@@ -22,16 +22,15 @@ public class ApplicationController
     private readonly List<BitwardenVaultItem> _vaultItems = new();
     private readonly List<RecentVaultEntry> _recentVaultEntries = new();
     private readonly List<Account> _accounts = [];
-    private byte[] _secret = [];
     private bool _initialized;
 
-    public ApplicationController(ISecretRepository secretRepository,
+    public ApplicationController(IEncryptionManager encryptionManager,
                                  IBitwardenInstanceRepository bitwardenInstanceRepository,
                                  IBinaryConfigurationRepository binaryConfigurationRepository,
                                  ITotpGenerator totpGenerator,
                                  IQuickwardenEnvironment environment)
     {
-        _secretRepository = secretRepository;
+        _encryptionManager = encryptionManager;
         _bitwardenInstanceRepository = bitwardenInstanceRepository;
         _binaryConfigurationRepository = binaryConfigurationRepository;
         _totpGenerator = totpGenerator;
@@ -48,11 +47,11 @@ public class ApplicationController
             return ApplicationInitializeResult.BitwardenCliNotFound;
 
         await _environment.Initialize();
-        var previousSecret = await _secretRepository.Get();
-        if (previousSecret == null)
+        var couldAccessKeychain = await _encryptionManager.Initialize();
+        if (!couldAccessKeychain)
             return ApplicationInitializeResult.CouldntAccessKeychain;
         
-        return await InitializeFromPreviousState(previousSecret);
+        return await InitializeFromPreviousState();
     }
 
     public AccountListModel[] GetAccounts()
@@ -162,9 +161,8 @@ public class ApplicationController
         return totp;
     }
 
-    private async Task<ApplicationInitializeResult> InitializeFromPreviousState(string previousSecret)
+    private async Task<ApplicationInitializeResult> InitializeFromPreviousState()
     {
-        _secret = Convert.FromHexString(previousSecret);
         var listBytesEncrypted = await _binaryConfigurationRepository.Get();
         if (listBytesEncrypted.Length == 0)
         {
@@ -186,10 +184,9 @@ public class ApplicationController
 
     private async Task LoadConfiguration(byte[] listBytesEncrypted)
     {
-        var decryptor = new Decryptor(_secret);
         try
         {
-            var decrypted = await decryptor.Decrypt(listBytesEncrypted);
+            var decrypted = await _encryptionManager.Decrypt(listBytesEncrypted);
             var configurationDeserialized =
                 JsonSerializer.Deserialize<Configuration>(decrypted,
                     ApplicationJsonSerializerContext.Default.Configuration);
@@ -214,8 +211,7 @@ public class ApplicationController
         var serialized =
             JsonSerializer.Serialize(configuration, ApplicationJsonSerializerContext.Default.Configuration);
         var bytes = Encoding.UTF8.GetBytes(serialized);
-        var encryptor = new Encryptor(_secret);
-        var encrypted = await encryptor.Encrypt(bytes);
+        var encrypted = await _encryptionManager.Encrypt(bytes);
         await _binaryConfigurationRepository.Store(encrypted);
     }
 

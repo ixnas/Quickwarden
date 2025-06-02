@@ -8,7 +8,7 @@ namespace Quickwarden.Tests;
 public class ApplicationFixture
 {
     public StaticClockFake StaticClock { get; }
-    public SecretRepositoryFake SecretRepository { get; }
+    public EncryptionManagerFake EncryptionManager { get; }
     public BitwardenInstanceRepositoryFake BitwardenInstanceRepository { get; }
     public BinaryConfigurationRepositoryFake BinaryConfigurationRepository { get; }
     public QuickwardenEnvironmentFake QuickwardenEnvironment { get; }
@@ -16,7 +16,7 @@ public class ApplicationFixture
     public ApplicationFixture()
     {
         StaticClock = new StaticClockFake();
-        SecretRepository = new SecretRepositoryFake();
+        EncryptionManager = new EncryptionManagerFake();
         BitwardenInstanceRepository = new BitwardenInstanceRepositoryFake();
         BinaryConfigurationRepository = new BinaryConfigurationRepositoryFake();
         QuickwardenEnvironment = new QuickwardenEnvironmentFake();
@@ -25,7 +25,7 @@ public class ApplicationFixture
 
     public ApplicationController CreateApplicationController()
     {
-        return new ApplicationController(SecretRepository,
+        return new ApplicationController(EncryptionManager,
                                          BitwardenInstanceRepository,
                                          BinaryConfigurationRepository,
                                          new TotpGenerator(StaticClock),

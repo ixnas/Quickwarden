@@ -4,10 +4,10 @@ namespace Quickwarden.Infrastructure;
 
 public static class SecretRepositoryFactory
 {
-    public static ISecretRepository Create()
+    public static IEncryptionManager Create()
     {
         if (OperatingSystem.IsWindows())
-            return new WindowsHelloSecretRepository();
-        return new MultiPlatformSecretRepository();
+            return new WindowsHelloEncryptionManager();
+        return new MultiPlatformEncryptionManager();
     }
 }

@@ -32,7 +32,7 @@ public class AppInitializeTests
     [Fact]
     public async Task DenyAccess()
     {
-        _fixture.SecretRepository.CanGet = false;
+        _fixture.EncryptionManager.CanGet = false;
         var result = await _applicationController.Initialize();
         Assert.Equal(ApplicationInitializeResult.CouldntAccessKeychain, result);
     }

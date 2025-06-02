@@ -2,7 +2,7 @@ using Quickwarden.Application.PlugIns;
 
 namespace Quickwarden.Tests.Fakes;
 
-public class SecretRepositoryFake : ISecretRepository
+public class EncryptionManagerFake : IEncryptionManager
 {
     public bool CanGet { get; set; } = true;
     private readonly string? _secret = GenerateSecret();
