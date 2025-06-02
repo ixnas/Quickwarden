@@ -12,7 +12,7 @@
         Title="Quickwarden"
         ShowInTaskbar="False"
         Width="720"
-        Height="600"
+        Height="640"
         TransparencyLevelHint="AcrylicBlur"
         RequestedThemeVariant="Light"
         CornerRadius="20"
@@ -52,11 +52,12 @@
     </Window.Styles>
 
     <Grid>
-        <Rectangle Opacity="0.5" Fill="White"></Rectangle>
+        <Rectangle Opacity="0.75" Fill="White"></Rectangle>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
             <TextBox Text="{Binding SearchBoxQuery}" IsEnabled="{Binding ApplicationInitialized}" BorderThickness="0"
@@ -80,7 +81,7 @@
                     </Style>
                 </ListBox.Styles>
             </ListBox>
-            <StackPanel Margin="8" Grid.Row="2" Orientation="Horizontal">
+            <StackPanel Margin="8 8 8 0" Grid.Row="2" Orientation="Horizontal">
                 <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
                     <Run Foreground="#888">Esc</Run>
                     <Span> Hide</Span>
@@ -93,6 +94,8 @@
                     <Run Foreground="#888" Text="{Binding SyncShortcut}"></Run>
                     <Run Foreground="{Binding SyncLabelColor}" Text="{Binding SyncShortcutLabel}"></Run>
                 </TextBlock>
+            </StackPanel>
+            <StackPanel Margin="8 0 8 8" Grid.Row="3" Orientation="Horizontal">
                 <TextBlock IsVisible="{Binding CopyUsernameEnabled}" FontSize="13" Margin="8"
                            VerticalAlignment="Center">
                     <Run Foreground="#888" Text="{Binding CopyUsernameShortcut}"></Run>
