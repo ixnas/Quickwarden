@@ -51,7 +51,7 @@ public class ApplicationController
         var previousSecret = await _secretRepository.Get();
         if (previousSecret == null)
             return ApplicationInitializeResult.CouldntAccessKeychain;
-        
+
         return await InitializeFromPreviousState(previousSecret);
     }
 
@@ -133,7 +133,7 @@ public class ApplicationController
         var filteredRecent = FilterSearchResults(recentVaultEntries, query);
         var filtered = FilterSearchResults(_vaultItems, query);
         var allResults = filteredRecent.Concat(filtered).Distinct();
-        
+
         return ToSearchResultItems(allResults);
     }
 
@@ -192,7 +192,8 @@ public class ApplicationController
             var decrypted = await decryptor.Decrypt(listBytesEncrypted);
             var configurationDeserialized =
                 JsonSerializer.Deserialize<Configuration>(decrypted,
-                    ApplicationJsonSerializerContext.Default.Configuration);
+                                                          ApplicationJsonSerializerContext.Default
+                                                              .Configuration);
             var accounts = configurationDeserialized?.Accounts ?? [];
             var recentVaultEntries = configurationDeserialized?.RecentVaultEntries ?? [];
             _accounts.AddRange(accounts);
@@ -231,6 +232,8 @@ public class ApplicationController
         var vaultIds = instances.Select(x => x.Id).ToArray();
         _vaultItems.RemoveAll(item => vaultIds.Contains(item.VaultId));
         _vaultItems.AddRange(allItems);
+        _vaultItems.Sort((a, b) =>
+                             string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
         var itemIds = _vaultItems.Select(x => x.Id).ToArray();
         _recentVaultEntries.RemoveAll(item => !itemIds.Contains(item.Id));
     }
@@ -254,7 +257,9 @@ public class ApplicationController
         return item;
     }
 
-    private static IEnumerable<BitwardenVaultItem> FilterSearchResults(IEnumerable<BitwardenVaultItem> results, string query)
+    private static IEnumerable<BitwardenVaultItem> FilterSearchResults(
+        IEnumerable<BitwardenVaultItem> results,
+        string query)
     {
         var searchTerms = query.Split(' ');
         return results
@@ -263,7 +268,7 @@ public class ApplicationController
                                                                   StringComparison
                                                                       .InvariantCultureIgnoreCase)
                                                || item.Username?.Contains(term,
-                                                   StringComparison.InvariantCultureIgnoreCase)
+                                                        StringComparison.InvariantCultureIgnoreCase)
                                                == true));
     }
 
@@ -285,8 +290,8 @@ public class ApplicationController
     public async Task Sync()
     {
         var keys = _accounts
-            .Select(account => new BitwardenInstanceKey(account.Id, account.Username, account.Secret))
-            .ToArray();
+                   .Select(account => new BitwardenInstanceKey(account.Id, account.Username, account.Secret))
+                   .ToArray();
         var repos = await _bitwardenInstanceRepository.Get(keys);
         await LoadVaults(repos, CancellationToken.None);
         await StoreConfiguration();

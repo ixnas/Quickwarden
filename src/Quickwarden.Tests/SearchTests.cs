@@ -150,6 +150,22 @@ public class SearchTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task SortsAlphabetically()
+    {
+        await SignInAccount2();
+        await SignInAccount1();
+        
+        _applicationController = _fixture.CreateApplicationController();
+        await _applicationController.Initialize();
+        
+        var searchResult = _applicationController.Search("Entry");
+        Assert.Equal(2, searchResult.Count());
+        
+        Assert.Equal("Vault entry 1", searchResult[0].Name);
+        Assert.Equal("Vault entry 2", searchResult[1].Name);
+    }
+
+    [Fact]
     public async Task SearchAfterSignout()
     {
         await SignInAccount1();

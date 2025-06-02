@@ -12,9 +12,7 @@ Quickly search through your Bitwarden vaults.
 - Navigate quickly using only your keyboard
 - Encrypts your Bitwarden session keys using Windows Hello or macOS Keychain
 
-<p align="center">
-<img src="assets/screenshot.png" width="830" alt="Logo"/>
-</p>
+<img src="assets/screenshot.png" width="720" alt="Screenshot"/>
 
 ## Contents
 - [Installing a release](#installing-a-release)
