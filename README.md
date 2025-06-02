@@ -10,7 +10,7 @@ Quickly search through your Bitwarden vaults.
 - Instantly search from any application using a global keyboard shortcut
 - Search through multiple accounts at once
 - Navigate quickly using only your keyboard
-- Encrypts your Bitwarden session keys using Windows Credential Vault or macOS Keychain
+- Encrypts your Bitwarden session keys using Windows Hello or macOS Keychain
 
 ## Contents
 - [Installing a release](#installing-a-release)
@@ -66,7 +66,7 @@ After you start Quickwarden, use **Ctrl+Alt+P** on Windows, or **⌘⌥P** on ma
 To set up your Bitwarden account, use **Ctrl+S** on Windows, or **⌘S** on macOS to open the settings window.
 From there you can sign in to your Bitwarden account.
 
-You can now use Quickwarden to search through your vault and copy credentials!
+You can now use Quickwarden to search through your vault!
 
 ## Building from source
 ### Development
@@ -80,11 +80,11 @@ The source code in the `src` directory consists of the following projects:
 - **Quickwarden.Infrastructure** contains the low-level implementation details.
 - **Quickwarden.Tests** contains tests for the high level application logic.
 
+If you're developing on Windows, make sure to use the `net9.0-windows*` target framework.
+
 ### Packaging
 To create a package, run the script for your current platform in the `scripts` directory.
 The packages will be created in the `dist` directory.
-
-If you'd like to build installers on Windows, you'll have to install Inno Setup first.
 
 ## Security
 
@@ -99,15 +99,20 @@ Any other data that Quickwarden needs to operate is always stored fully encrypte
 This currently consists of:
 
  - E-mail addresses for signed-in users
- - Bitwarden CLI vault location and session keys
+ - Bitwarden CLI vault locations and session keys
  - IDs of your most recently used vault items
 
-The key to unlock this data is securely stored in your platform's credential manager.
-On Windows Quickwarden will use the Windows Hello, on macOS it'll use Keychain.
+The key to unlock this data is stored in your platform's credential manager.
+On Windows Quickwarden will use Windows Hello, on macOS it'll use Keychain.
 
-The binary releases are currently signed with a self-signed certificate.
-This ensures that only these signed binary releases are able to unlock Quickwarden's encrypted data.
-Other applications won't be able to access this data unless if you're on macOS and specifically allow another app to access Quickwarden's keychain entry.
+On Windows, other applications won't be able to access this data without you first authenticating with Windows Hello.
+Unfortunately Windows doesn't have a mechanism to identify apps and restrict stored credentials to a specific application, so never accept Windows Hello prompts from apps you don't trust.
+Quickwarden will only ever trigger a prompt just after it starts up.
+
+On macOS, only applications that you specifically allow to access the Quickwarden Keychain entry will have access to Quickwarden's data.
+Whenever you update Quickwarden and the Keychain prompt comes up saying that Quickwarden wants to access your Quickwarden keychain entry, click "Always Allow".
+The prompt won't come up anymore until you update Quickwarden again.
+In no other circumstance should you ever allow any app access to this entry.
 
 ## Disclaimer
 

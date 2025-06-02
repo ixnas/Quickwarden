@@ -18,7 +18,8 @@ public class WindowsHelloSecretRepository : ISecretRepository
         var isSupported = await KeyCredentialManager.IsSupportedAsync();
         if (!isSupported)
             return null;
-        var credentialKey = await GetCredentialKey();
+        var certificateKey = GetCertificateKey();
+        var credentialKey = GetCredentialKey(certificateKey);
         var previousSecret = await KeyCredentialManager.OpenAsync(credentialKey);
         if (previousSecret.Status == KeyCredentialStatus.NotFound)
         {
@@ -26,17 +27,17 @@ public class WindowsHelloSecretRepository : ISecretRepository
                 await KeyCredentialManager.RequestCreateAsync(credentialKey, KeyCredentialCreationOption.FailIfExists);
             if (createResult.Status != KeyCredentialStatus.Success)
                 return null;
-            return ToApplicationSecret(createResult.Credential);
+            return await ToApplicationSecret(createResult.Credential, certificateKey);
         }
 
         if (previousSecret.Status != KeyCredentialStatus.Success)
             return null;
-        return ToApplicationSecret(previousSecret.Credential);
+        return await ToApplicationSecret(previousSecret.Credential, certificateKey);
     }
 
-    private static async Task<string> GetCredentialKey()
+    private string GetCredentialKey(byte[] certificateKey)
     {
-        var publicKeyTokenString = await GetCertificateKey();
+        var publicKeyTokenString = Convert.ToBase64String(certificateKey);
         var userSid = WindowsIdentity.GetCurrent().User?.Value ?? "no-user";
         var keyMaterial = $"Quickwarden-{publicKeyTokenString}-{userSid}";
         var keyMaterialBytes = Encoding.UTF8.GetBytes(keyMaterial);
@@ -44,30 +45,33 @@ public class WindowsHelloSecretRepository : ISecretRepository
         return Convert.ToHexString(hash);
     }
 
-    private static string ToApplicationSecret(KeyCredential credential)
+    private static async Task<string?> ToApplicationSecret(KeyCredential credential, byte[] certificateKey)
     {
-        var byteArray = credential.RetrievePublicKey().ToArray();
-        var shaByteArray = SHA256.HashData(byteArray);
+        var signResult = await credential.RequestSignAsync(certificateKey.AsBuffer());
+        if (signResult.Status != KeyCredentialStatus.Success)
+            return null;
+        var signed = signResult.Result.ToArray();
+        var shaByteArray = SHA256.HashData(signed);
         return Convert.ToHexString(shaByteArray);
     }
 
-    private static async Task<string> GetCertificateKey()
+    private static byte[] GetCertificateKey()
     {
         if (string.IsNullOrWhiteSpace(Environment.ProcessPath))
-            return string.Empty;
+            return [];
         try
         {
             var executingCert = X509Certificate.CreateFromSignedFile(Environment.ProcessPath);
             if (executingCert == null)
-                return string.Empty;
+                return [];
             var assemblyKey = executingCert.GetPublicKey();
             var keyHash = SHA256.HashData(assemblyKey);
 
-            return Convert.ToBase64String(keyHash);
+            return keyHash;
         }
         catch (CryptographicException)
         {
-            return string.Empty;
+            return [];
         }
     }
 }
