@@ -29,6 +29,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private CredentialListItem? _selectedCredential;
     private string _searchBoxQuery = string.Empty;
     private bool _isSyncing;
+    public KeyGesture SettingsShortcutGesture => OperatingSystem.IsMacOS()
+                                                     ? new KeyGesture(Key.S, KeyModifiers.Meta)
+                                                     : new KeyGesture(Key.S, KeyModifiers.Control);
     public string SettingsShortcut => OperatingSystem.IsMacOS() ? "⌘S" : "Ctrl-S";
     public KeyGesture CopyUsernameGesture => OperatingSystem.IsMacOS()
                                                  ? new KeyGesture(Key.U, KeyModifiers.Meta)
@@ -46,9 +49,10 @@ public partial class MainWindowViewModel : ViewModelBase
                                             ? new KeyGesture(Key.T, KeyModifiers.Meta)
                                             : new KeyGesture(Key.T, KeyModifiers.Control);
     public string Copy2FaShortcut => OperatingSystem.IsMacOS() ? "⌘T" : "Ctrl-T";
-    public KeyGesture SettingsShortcutGesture => OperatingSystem.IsMacOS()
-                                                     ? new KeyGesture(Key.S, KeyModifiers.Meta)
-                                                     : new KeyGesture(Key.S, KeyModifiers.Control);
+    public KeyGesture CopyNotesGesture => OperatingSystem.IsMacOS()
+                                            ? new KeyGesture(Key.N, KeyModifiers.Meta)
+                                            : new KeyGesture(Key.N, KeyModifiers.Control);
+    public string CopyNotesShortcut => OperatingSystem.IsMacOS() ? "⌘N" : "Ctrl-N";
     public bool ApplicationInitialized => _applicationController != null;
     public string SyncShortcutLabel => IsSyncing ? " Syncing..." : " Sync";
     public string SyncLabelColor => IsSyncing ? "#888" : "#000";
@@ -56,6 +60,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool CopyUsernameEnabled => SelectedCredential?.HasUsername == true;
     public bool CopyPasswordEnabled => SelectedCredential?.HasPassword == true;
     public bool Copy2FaEnabled => SelectedCredential?.HasTotp == true;
+    public bool CopyNotesEnabled => SelectedCredential?.HasNotes == true;
     public string SearchBoxQuery
     {
         get => _searchBoxQuery;
@@ -73,6 +78,7 @@ public partial class MainWindowViewModel : ViewModelBase
                               HasTotp = val.HasTotp,
                               HasPassword = val.HasPassword,
                               HasUsername = val.HasUsername,
+                              HasNotes = val.HasNotes,
                           })
                           .ToArray();
         }
@@ -97,6 +103,7 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(CopyUsernameEnabled));
             OnPropertyChanged(nameof(CopyPasswordEnabled));
             OnPropertyChanged(nameof(Copy2FaEnabled));
+            OnPropertyChanged(nameof(CopyNotesEnabled));
         }
     }
     private bool IsSyncing
@@ -164,6 +171,15 @@ public partial class MainWindowViewModel : ViewModelBase
         if (SelectedCredential == null || !SelectedCredential.HasTotp || _applicationController == null)
             return;
         await _mainWindow.Clipboard.SetTextAsync((await _applicationController.GetTotp(SelectedCredential.Id)).Code);
+        Hide();
+    }
+    
+    [RelayCommand]
+    public async Task CopyNotes()
+    {
+        if (SelectedCredential == null || !SelectedCredential.HasNotes || _applicationController == null)
+            return;
+        await _mainWindow.Clipboard.SetTextAsync(await _applicationController.GetNotes(SelectedCredential.Id));
         Hide();
     }
 

@@ -52,6 +52,7 @@ public class ApplicationFixture
             Username = "sjoerd@entry1site.com",
             Password = "password1",
             Totp = "W5WQ W3P4 3M3I 2A6M 4SSD 4SM2 SJT6 OZZH 3ASR ZURK 24JR AYU5 WSKA",
+            Notes = "Secret notes!",
             VaultId = "id1",
         });
         

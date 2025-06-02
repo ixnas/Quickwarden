@@ -21,6 +21,7 @@ public class GetCredentialsTests : IAsyncLifetime
         await Assert.ThrowsAsync<ApplicationNotInitializedException>(() => _applicationController.GetPassword("234978"));
         await Assert.ThrowsAsync<ApplicationNotInitializedException>(() => _applicationController.GetUsername("234978"));
         await Assert.ThrowsAsync<ApplicationNotInitializedException>(() => _applicationController.GetTotp("234978"));
+        await Assert.ThrowsAsync<ApplicationNotInitializedException>(() => _applicationController.GetNotes("234978"));
     }
     
     [Fact]
@@ -30,6 +31,7 @@ public class GetCredentialsTests : IAsyncLifetime
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _applicationController.GetPassword("anId"));
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _applicationController.GetUsername("anId"));
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _applicationController.GetTotp("anId"));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => _applicationController.GetNotes("anId"));
     }
     
     [Fact]
@@ -43,6 +45,8 @@ public class GetCredentialsTests : IAsyncLifetime
         var totp = await _applicationController.GetTotp("234978");
         Assert.Equal("076986", totp.Code);
         Assert.Equal(30, totp.SecondsRemaining);
+        var notes = await _applicationController.GetNotes("234978");
+        Assert.Equal("Secret notes!", notes);
     }
 
     [Fact]
@@ -64,6 +68,13 @@ public class GetCredentialsTests : IAsyncLifetime
     {
         await SignInAccount1();
         await Assert.ThrowsAsync<PasswordNotFoundException>(() => _applicationController.GetPassword("483938"));
+    }
+    
+    [Fact]
+    public async Task NotesNotFound()
+    {
+        await SignInAccount1();
+        await Assert.ThrowsAsync<NotesNotFoundException>(() => _applicationController.GetNotes("483938"));
     }
     
     public async Task InitializeAsync()

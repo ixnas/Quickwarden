@@ -69,6 +69,7 @@
                     <KeyBinding Gesture="{Binding CopyUsernameGesture}" Command="{Binding CopyUsernameCommand, Mode=OneWay}" />
                     <KeyBinding Gesture="{Binding CopyPasswordGesture}" Command="{Binding CopyPasswordCommand, Mode=OneWay}" />
                     <KeyBinding Gesture="{Binding Copy2FaGesture}" Command="{Binding Copy2FaCommand, Mode=OneWay}" />
+                    <KeyBinding Gesture="{Binding CopyNotesGesture}" Command="{Binding CopyNotesCommand, Mode=OneWay}" />
                 </TextBox.KeyBindings>
                 <Interaction.Behaviors>
                     <FocusOnAttachedBehavior></FocusOnAttachedBehavior>
@@ -82,20 +83,6 @@
                 </ListBox.Styles>
             </ListBox>
             <StackPanel Margin="8 8 8 0" Grid.Row="2" Orientation="Horizontal">
-                <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
-                    <Run Foreground="#888">Esc</Run>
-                    <Span> Hide</Span>
-                </TextBlock>
-                <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
-                    <Run Foreground="#888" Text="{Binding SettingsShortcut}"></Run>
-                    <Span> Settings...</Span>
-                </TextBlock>
-                <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
-                    <Run Foreground="#888" Text="{Binding SyncShortcut}"></Run>
-                    <Run Foreground="{Binding SyncLabelColor}" Text="{Binding SyncShortcutLabel}"></Run>
-                </TextBlock>
-            </StackPanel>
-            <StackPanel Margin="8 0 8 8" Grid.Row="3" Orientation="Horizontal">
                 <TextBlock IsVisible="{Binding CopyUsernameEnabled}" FontSize="13" Margin="8"
                            VerticalAlignment="Center">
                     <Run Foreground="#888" Text="{Binding CopyUsernameShortcut}"></Run>
@@ -109,6 +96,24 @@
                 <TextBlock IsVisible="{Binding Copy2FaEnabled}" FontSize="13" Margin="8" VerticalAlignment="Center">
                     <Run Foreground="#888" Text="{Binding Copy2FaShortcut}"></Run>
                     <Span> Copy 2FA</Span>
+                </TextBlock>
+                <TextBlock IsVisible="{Binding CopyNotesEnabled}" FontSize="13" Margin="8" VerticalAlignment="Center">
+                    <Run Foreground="#888" Text="{Binding CopyNotesShortcut}"></Run>
+                    <Span> Copy notes</Span>
+                </TextBlock>
+            </StackPanel>
+            <StackPanel Margin="8 0 8 8" Grid.Row="3" Orientation="Horizontal">
+                <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
+                    <Run Foreground="#888">Esc</Run>
+                    <Span> Hide</Span>
+                </TextBlock>
+                <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
+                    <Run Foreground="#888" Text="{Binding SettingsShortcut}"></Run>
+                    <Span> Settings...</Span>
+                </TextBlock>
+                <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
+                    <Run Foreground="#888" Text="{Binding SyncShortcut}"></Run>
+                    <Run Foreground="{Binding SyncLabelColor}" Text="{Binding SyncShortcutLabel}"></Run>
                 </TextBlock>
             </StackPanel>
         </Grid>

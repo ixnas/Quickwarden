@@ -8,4 +8,5 @@ public record SearchResultItem
     public required bool HasTotp { get; init; }
     public required bool HasPassword { get; init; }
     public required bool HasUsername { get; init; }
+    public required bool HasNotes { get; init; }
 }

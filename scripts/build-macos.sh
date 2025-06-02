@@ -10,8 +10,8 @@ cd ../src/Quickwarden.UI
 
 echo "-- Build Native AOT binaries."
 dotnet clean
-dotnet publish -r osx-x64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
-dotnet publish -r osx-arm64 -c Release -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
+dotnet publish -r osx-x64 -c Release -f net9.0 -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
+dotnet publish -r osx-arm64 -c Release -f net9.0 -p:DebugType=None -p:DebugSymbols=false -p:Version=${GIT_LAST_TAG} -p:AssemblyVersion=${GIT_LAST_TAG} -p:InformationalVersion=${GIT_LAST_TAG}
 
 echo "-- Create app bundle folder structures."
 mkdir -p ../../dist/quickwarden-${GIT_VERSION}-macos-x64/Quickwarden.app/Contents/MacOS

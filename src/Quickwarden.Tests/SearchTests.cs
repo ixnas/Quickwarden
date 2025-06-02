@@ -59,6 +59,7 @@ public class SearchTests : IAsyncLifetime
         Assert.True(entry1.HasTotp);
         Assert.True(entry1.HasPassword);
         Assert.True(entry1.HasUsername);
+        Assert.True(entry1.HasNotes);
         Assert.False(string.IsNullOrWhiteSpace(entry1.Id));
         
         var entry2 = searchResult.Single(item => item.Name == "Vault entry 2");
@@ -66,6 +67,7 @@ public class SearchTests : IAsyncLifetime
         Assert.False(entry2.HasTotp);
         Assert.True(entry2.HasPassword);
         Assert.True(entry2.HasUsername);
+        Assert.False(entry2.HasNotes);
         Assert.False(string.IsNullOrWhiteSpace(entry2.Id));
     }
 

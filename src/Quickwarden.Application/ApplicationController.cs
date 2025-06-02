@@ -278,6 +278,7 @@ public class ApplicationController
                    HasTotp = !string.IsNullOrWhiteSpace(item.Totp),
                    HasPassword = !string.IsNullOrWhiteSpace(item.Password),
                    HasUsername = !string.IsNullOrWhiteSpace(item.Username),
+                   HasNotes = !string.IsNullOrWhiteSpace(item.Notes),
                }).ToArray();
     }
 
@@ -289,5 +290,13 @@ public class ApplicationController
         var repos = await _bitwardenInstanceRepository.Get(keys);
         await LoadVaults(repos, CancellationToken.None);
         await StoreConfiguration();
+    }
+
+    public async Task<string> GetNotes(string id)
+    {
+        var item = await GetVaultItem(id);
+        if (string.IsNullOrWhiteSpace(item?.Notes))
+            throw new NotesNotFoundException();
+        return item.Notes;
     }
 }
