@@ -41,10 +41,10 @@ public class ApplicationFixture
             Username = key.Username,
         };
         var instanceWithCredentials = new InstanceWithCredentials("sjoerd",
-                                               " pass",
-                                               "237489",
-                                               instance,
-                                               key);
+                                                                  " pass",
+                                                                  "237489",
+                                                                  instance,
+                                                                  key);
         ((BitwardenInstanceFake)instanceWithCredentials.Instance).VaultItems.Add(new BitwardenVaultItem()
         {
             Id = "234978",
@@ -55,7 +55,7 @@ public class ApplicationFixture
             Notes = "Secret notes!",
             VaultId = "id1",
         });
-        
+
         ((BitwardenInstanceFake)instanceWithCredentials.Instance).VaultItems.Add(new BitwardenVaultItem()
         {
             Id = "483938",
@@ -63,7 +63,7 @@ public class ApplicationFixture
             Username = "sjoerd@nopass.com",
             VaultId = "id1",
         });
-        
+
         ((BitwardenInstanceFake)instanceWithCredentials.Instance).VaultItems.Add(new BitwardenVaultItem()
         {
             Id = "348948",
@@ -71,7 +71,7 @@ public class ApplicationFixture
             Password = "password3",
             VaultId = "id1",
         });
-        
+
         BitwardenInstanceRepository.InstancesWithCredentials.Add(instanceWithCredentials);
 
         var key2 = new BitwardenInstanceKey("id2", "hannie", "secret2");
@@ -97,6 +97,22 @@ public class ApplicationFixture
         });
 
         BitwardenInstanceRepository.InstancesWithCredentials.Add(instanceWithCredentials2);
+    }
+
+    public async Task SignInAccount1(ApplicationController controller)
+    {
+        await controller.SignIn("sjoerd",
+                                                   " pass",
+                                                   "237489",
+                                                   CancellationToken.None);
+    }
+
+    public async Task SignInAccount2(ApplicationController controller)
+    {
+        await controller.SignIn("hannie",
+                                                   "pass2",
+                                                   "473829",
+                                                   CancellationToken.None);
     }
 }
 

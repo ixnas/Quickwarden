@@ -24,7 +24,7 @@ public class SearchTests : IAsyncLifetime
     [Fact]
     public async Task SearchSingleAccount()
     {
-        await SignInAccount1();
+        await _fixture.SignInAccount1(_applicationController);
         var searchResult = _applicationController.Search("No");
         Assert.Equal(2, searchResult.Length);
         
@@ -48,8 +48,8 @@ public class SearchTests : IAsyncLifetime
     [Fact]
     public async Task SearchMultipleAccounts()
     {
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         
         var searchResult = _applicationController.Search("Entry");
         Assert.Equal(2, searchResult.Count());
@@ -84,8 +84,8 @@ public class SearchTests : IAsyncLifetime
     [InlineData(null)]
     public async Task SearchEmptyQuery(string? query)
     {
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         var searchResults = _applicationController.Search(query);
         Assert.Empty(searchResults);
     }
@@ -93,8 +93,8 @@ public class SearchTests : IAsyncLifetime
     [Fact]
     public async Task SearchNonMatchingQuery()
     {
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         var searchResults = _applicationController.Search("Something");
         Assert.Empty(searchResults);
     }
@@ -102,8 +102,8 @@ public class SearchTests : IAsyncLifetime
     [Fact]
     public async Task SearchByName()
     {
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         var searchResults = _applicationController.Search("Vault 1 .com");
         
         var entry1 = searchResults.Single(item => item.Name == "Vault entry 1");
@@ -116,8 +116,8 @@ public class SearchTests : IAsyncLifetime
     [Fact]
     public async Task SearchConstraints()
     {
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         var searchResults = _applicationController.Search("Vault 1 yxoe .com");
         Assert.Empty(searchResults);
     }
@@ -125,8 +125,8 @@ public class SearchTests : IAsyncLifetime
     [Fact]
     public async Task SearchAfterRestart()
     {
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         
         _applicationController = _fixture.CreateApplicationController();
         await _applicationController.Initialize();
@@ -152,8 +152,8 @@ public class SearchTests : IAsyncLifetime
     [Fact]
     public async Task SortsAlphabetically()
     {
-        await SignInAccount2();
-        await SignInAccount1();
+        await _fixture.SignInAccount2(_applicationController);
+        await _fixture.SignInAccount1(_applicationController);
         
         _applicationController = _fixture.CreateApplicationController();
         await _applicationController.Initialize();
@@ -168,8 +168,8 @@ public class SearchTests : IAsyncLifetime
     [Fact]
     public async Task SearchAfterSignout()
     {
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         await _applicationController.SignOut("id1");
         var searchResult = _applicationController.Search("Vault");
         var result = searchResult.Single();
@@ -184,23 +184,5 @@ public class SearchTests : IAsyncLifetime
     public Task DisposeAsync()
     {
         return Task.CompletedTask;
-    }
-
-    private async Task SignInAccount1()
-    {
-        var signInResult = await _applicationController.SignIn("sjoerd",
-                                                               " pass",
-                                                               "237489",
-                                                               CancellationToken.None);
-        Assert.Equal(SignInResult.Success, signInResult);
-    }
-
-    private async Task SignInAccount2()
-    {
-        var signInResult = await _applicationController.SignIn("hannie",
-                                                                "pass2",
-                                                                "473829",
-                                                                CancellationToken.None);
-        Assert.Equal(SignInResult.Success, signInResult);
     }
 }

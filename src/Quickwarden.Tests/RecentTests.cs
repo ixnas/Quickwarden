@@ -34,8 +34,8 @@ public class RecentTests
     public async Task AddsMultipleEntries(Credentials credential)
     {
         await _applicationController.Initialize();
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         var search1 = _applicationController.Search(string.Empty);
         Assert.Empty(search1);
         GetCredentialsFns[credential]("234978");
@@ -54,8 +54,8 @@ public class RecentTests
     public async Task MovesReusedToTop(Credentials credential)
     {
         await _applicationController.Initialize();
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         var search1 = _applicationController.Search(string.Empty);
         Assert.Empty(search1);
         GetCredentialsFns[credential]("234978");
@@ -79,8 +79,8 @@ public class RecentTests
     public async Task NoDuplicates(Credentials credential)
     {
         await _applicationController.Initialize();
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         var search1 = _applicationController.Search(string.Empty);
         Assert.Empty(search1);
         GetCredentialsFns[credential]("234978");
@@ -99,8 +99,8 @@ public class RecentTests
     public async Task SavesRecentEntries(Credentials credential)
     {
         await _applicationController.Initialize();
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         GetCredentialsFns[credential]("234978");
         GetCredentialsFns[credential]("23847837");
         _applicationController = _fixture.CreateApplicationController();
@@ -116,8 +116,8 @@ public class RecentTests
     public async Task SearchesRecentFirst(Credentials credential)
     {
         await _applicationController.Initialize();
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         GetCredentialsFns[credential]("23847837");
         var search = _applicationController.Search("Vault");
         Assert.Equal(2, search.Length);
@@ -132,8 +132,8 @@ public class RecentTests
     public async Task RemovesEntriesAfterSignOut(Credentials credential)
     {
         await _applicationController.Initialize();
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         GetCredentialsFns[credential]("234978");
         await _applicationController.SignOut("id1");
         var search1 = _applicationController.Search(string.Empty);
@@ -147,8 +147,8 @@ public class RecentTests
     public async Task RemovedVaultItem(Credentials credential)
     {
         await _applicationController.Initialize();
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         GetCredentialsFns[credential]("234978");
         var instance = _fixture.BitwardenInstanceRepository.BitwardenInstances
                                .Single(instance => instance.Key.Id == "id1");
@@ -157,23 +157,5 @@ public class RecentTests
         await _applicationController.Initialize();
         var search1 = _applicationController.Search(string.Empty);
         Assert.Empty(search1);
-    }
-
-    private async Task SignInAccount1()
-    {
-        var signInResult = await _applicationController.SignIn("sjoerd",
-                                                               " pass",
-                                                               "237489",
-                                                               CancellationToken.None);
-        Assert.Equal(SignInResult.Success, signInResult);
-    }
-
-    private async Task SignInAccount2()
-    {
-        var signInResult = await _applicationController.SignIn("hannie",
-                                                               "pass2",
-                                                               "473829",
-                                                               CancellationToken.None);
-        Assert.Equal(SignInResult.Success, signInResult);
     }
 }

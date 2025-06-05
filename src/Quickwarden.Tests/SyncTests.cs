@@ -19,8 +19,8 @@ public class SyncTests
     public async Task RemovesRemovedEntries()
     {
         await _applicationController.Initialize();
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         var results = _applicationController.Search("Vault");
         Assert.Equal(2, results.Length);
         var instance = _fixture.BitwardenInstanceRepository.BitwardenInstances.Single(instance => instance.Key.Id == "id1").Instance;
@@ -34,8 +34,8 @@ public class SyncTests
     public async Task AddsNewEntry()
     {
         await _applicationController.Initialize();
-        await SignInAccount1();
-        await SignInAccount2();
+        await _fixture.SignInAccount1(_applicationController);
+        await _fixture.SignInAccount2(_applicationController);
         var results = _applicationController.Search("Vault");
         Assert.Equal(2, results.Length);
         var instance = _fixture.BitwardenInstanceRepository.BitwardenInstances.Single(instance => instance.Key.Id == "id1").Instance;
@@ -48,23 +48,5 @@ public class SyncTests
         await _applicationController.Sync();
         var results2 = _applicationController.Search("Vault");
         Assert.Equal(3, results2.Length);
-    }
-    
-    private async Task SignInAccount1()
-    {
-        var signInResult = await _applicationController.SignIn("sjoerd",
-                                                               " pass",
-                                                               "237489",
-                                                               CancellationToken.None);
-        Assert.Equal(SignInResult.Success, signInResult);
-    }
-
-    private async Task SignInAccount2()
-    {
-        var signInResult = await _applicationController.SignIn("hannie",
-                                                               "pass2",
-                                                               "473829",
-                                                               CancellationToken.None);
-        Assert.Equal(SignInResult.Success, signInResult);
     }
 }
